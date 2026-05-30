@@ -23,6 +23,9 @@ app.get('*', (_req, res) => {
 if (process.env.NODE_ENV !== 'test') {
   initDb().then(() => {
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  }).catch(err => {
+    console.error('Failed to initialize database:', err);
+    process.exit(1);
   });
 }
 
