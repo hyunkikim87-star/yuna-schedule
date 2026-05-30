@@ -7,6 +7,8 @@ export default function ScheduleCard({ item, onEdit }) {
       className="schedule-card"
       style={{ background: bg, borderLeftColor: bg }}
       onClick={() => onEdit(item)}
+      tabIndex={0}
+      onKeyDown={e => e.key === 'Enter' && onEdit(item)}
     >
       <div className="card-title">{item.class_name}</div>
       {item.location && <div className="card-meta">📍 {item.location}</div>}
