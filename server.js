@@ -20,6 +20,11 @@ app.get('/{*splat}', (_req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
+app.use((err, _req, res, _next) => {
+  console.error(err);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
 if (process.env.NODE_ENV !== 'test') {
   initDb().then(() => {
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
