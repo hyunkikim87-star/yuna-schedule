@@ -6,6 +6,11 @@ const pool = new Pool({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
 });
 
+pool.on('error', (err) => {
+  console.error('Unexpected DB error:', err);
+  process.exit(-1);
+});
+
 export async function initDb() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS schedules (
