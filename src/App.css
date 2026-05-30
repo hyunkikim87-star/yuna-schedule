@@ -195,3 +195,14 @@ body {
   font-size: 0.95rem;
   cursor: pointer;
 }
+
+.btn-save:hover { background: #212529; }
+.btn-cancel:hover { background: #e9ecef; }
+.btn-delete:hover { background: #f5c2c7; }
+
+.btn-save:focus, .btn-cancel:focus, .btn-delete:focus {
+  outline: 2px solid #343a40;
+  outline-offset: 2px;
+}
+
+.schedule-card:focus { outline: 2px solid #343a40; outline-offset: 2px; }
