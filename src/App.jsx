@@ -39,34 +39,46 @@ export default function App() {
   const weekCount = getWeekCount(year, month);
 
   const fetchSchedules = useCallback(async () => {
-    const res = await fetch(`/api/schedules?year=${year}&month=${month}&week=${week}`);
-    setSchedules(await res.json());
+    try {
+      const res = await fetch(`/api/schedules?year=${year}&month=${month}&week=${week}`);
+      setSchedules(await res.json());
+    } catch (err) {
+      console.error('Failed to fetch schedules:', err);
+    }
   }, [year, month, week]);
 
   useEffect(() => { fetchSchedules(); }, [fetchSchedules]);
 
   async function handleSave(data) {
-    if (data.id) {
-      await fetch(`/api/schedules/${data.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-    } else {
-      await fetch('/api/schedules', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, year, month, week }),
-      });
+    try {
+      if (data.id) {
+        await fetch(`/api/schedules/${data.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+      } else {
+        await fetch('/api/schedules', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...data, year, month, week }),
+        });
+      }
+      setModal(null);
+      fetchSchedules();
+    } catch (err) {
+      console.error('Failed to save schedule:', err);
     }
-    setModal(null);
-    fetchSchedules();
   }
 
   async function handleDelete(id) {
-    await fetch(`/api/schedules/${id}`, { method: 'DELETE' });
-    setModal(null);
-    fetchSchedules();
+    try {
+      await fetch(`/api/schedules/${id}`, { method: 'DELETE' });
+      setModal(null);
+      fetchSchedules();
+    } catch (err) {
+      console.error('Failed to delete schedule:', err);
+    }
   }
 
   return (
