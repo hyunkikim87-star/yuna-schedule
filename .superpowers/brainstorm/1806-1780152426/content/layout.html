@@ -1,0 +1,98 @@
+<h2>레이아웃 어떤 게 좋아요?</h2>
+<p class="subtitle">토/일 일정 보여주는 방식 3가지예요. 클릭해서 골라주세요.</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f8f9fa;padding:16px;border-radius:8px;font-family:sans-serif;">
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <div style="background:#e9ecef;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;color:#495057">2026년 6월 1주</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:white;border-radius:8px;padding:10px;border:1px solid #dee2e6;">
+          <div style="font-size:10px;font-weight:700;color:#6c757d;margin-bottom:6px">토요일</div>
+          <div style="background:#fff3cd;border-radius:6px;padding:8px;margin-bottom:6px;border-left:3px solid #ffc107">
+            <div style="font-size:12px;font-weight:700">발레</div>
+            <div style="font-size:10px;color:#6c757d">📍 문화센터 B관</div>
+            <div style="font-size:10px;color:#6c757d">🎒 발레복, 슈즈</div>
+          </div>
+          <div style="background:#d1ecf1;border-radius:6px;padding:8px;border-left:3px solid #17a2b8">
+            <div style="font-size:12px;font-weight:700">미술</div>
+            <div style="font-size:10px;color:#6c757d">📍 롯데문화센터</div>
+            <div style="font-size:10px;color:#6c757d">🎒 앞치마</div>
+          </div>
+        </div>
+        <div style="background:white;border-radius:8px;padding:10px;border:1px solid #dee2e6;">
+          <div style="font-size:10px;font-weight:700;color:#6c757d;margin-bottom:6px">일요일</div>
+          <div style="background:#d4edda;border-radius:6px;padding:8px;border-left:3px solid #28a745">
+            <div style="font-size:12px;font-weight:700">피아노</div>
+            <div style="font-size:10px;color:#6c757d">📍 음악학원</div>
+            <div style="font-size:10px;color:#6c757d">📝 교재 챙기기</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A. 토/일 나란히</h3>
+      <p>토요일과 일요일을 좌우로 동시에 보여줘요. 한눈에 주말 전체를 파악하기 좋아요.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f8f9fa;padding:16px;border-radius:8px;font-family:sans-serif;">
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <div style="background:#e9ecef;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;color:#495057">2026년 6월 1주</div>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:10px;">
+        <div style="background:#343a40;color:white;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700">토요일</div>
+        <div style="background:white;color:#495057;padding:6px 16px;border-radius:20px;font-size:12px;border:1px solid #dee2e6">일요일</div>
+      </div>
+      <div style="background:white;border-radius:8px;padding:10px;border:1px solid #dee2e6;">
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f1f3f5">
+          <div style="width:32px;height:32px;background:#fff3cd;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">🩰</div>
+          <div>
+            <div style="font-size:12px;font-weight:700">발레</div>
+            <div style="font-size:10px;color:#6c757d">문화센터 B관 · 🎒 발레복, 슈즈</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0">
+          <div style="width:32px;height:32px;background:#d1ecf1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">🎨</div>
+          <div>
+            <div style="font-size:12px;font-weight:700">미술</div>
+            <div style="font-size:10px;color:#6c757d">롯데문화센터 · 🎒 앞치마</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B. 탭 전환</h3>
+      <p>토/일 탭을 눌러서 전환해요. 화면이 깔끔하고 모바일에서 보기 편해요.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f8f9fa;padding:16px;border-radius:8px;font-family:sans-serif;">
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <div style="background:#e9ecef;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;color:#495057">2026년 6월 1주</div>
+      </div>
+      <div style="background:white;border-radius:8px;border:1px solid #dee2e6;overflow:hidden;">
+        <div style="background:#343a40;color:white;padding:8px 12px;font-size:11px;font-weight:700">🗓 토요일</div>
+        <div style="padding:8px 12px;border-bottom:1px solid #f1f3f5;font-size:11px;">
+          <span style="font-weight:700">발레</span> <span style="color:#6c757d">· 문화센터 B관 · 🎒 발레복</span>
+        </div>
+        <div style="padding:8px 12px;font-size:11px;">
+          <span style="font-weight:700">미술</span> <span style="color:#6c757d">· 롯데문화센터 · 🎒 앞치마</span>
+        </div>
+        <div style="background:#343a40;color:white;padding:8px 12px;font-size:11px;font-weight:700">🗓 일요일</div>
+        <div style="padding:8px 12px;font-size:11px;">
+          <span style="font-weight:700">피아노</span> <span style="color:#6c757d">· 음악학원 · 📝 교재 챙기기</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C. 세로 리스트</h3>
+      <p>토→일 순서로 쭉 스크롤해서 봐요. 수업이 많을 때 가장 잘 보여요.</p>
+    </div>
+  </div>
+
+</div>
