@@ -4,11 +4,16 @@ import EventBlock from './EventBlock';
 const HOURS = Array.from({ length: 9 }, (_, i) => i + 9); // 9~17
 const DOW_KO = ['일', '월', '화', '수', '목', '금', '토'];
 
-export default function WeekView({ schedules, holidays, onEdit }) {
+function fmtDate(d) {
+  if (!d) return null;
+  return `${d.getMonth() + 1}/${d.getDate()}(${DOW_KO[d.getDay()]})`;
+}
+
+export default function WeekView({ schedules, holidays, satDate, sunDate, onEdit }) {
   const columns = [
     ...holidays.map(h => ({ key: h.date, day: h.date, label: h.name, cls: 'holiday', dateStr: h.date })),
-    { key: 'SAT', day: 'SAT', label: '토요일', cls: 'sat' },
-    { key: 'SUN', day: 'SUN', label: '일요일', cls: 'sun' },
+    { key: 'SAT', day: 'SAT', label: fmtDate(satDate) || '토요일', cls: 'sat' },
+    { key: 'SUN', day: 'SUN', label: fmtDate(sunDate) || '일요일', cls: 'sun' },
   ];
 
   const timedSchedules = schedules.filter(s => s.start_time && s.end_time);
