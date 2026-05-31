@@ -21,16 +21,19 @@ export default function EventModal({ mode, item, holidays, onSave, onDelete, onC
     supplies: item?.supplies ?? '',
     memo: item?.memo ?? '',
   });
+  const [repeatCount, setRepeatCount] = useState(1);
 
   function set(field, val) { setForm(f => ({ ...f, [field]: val })); }
 
   function handleSave() {
     if (!form.class_name.trim()) return;
+    const isRepeatable = form.day === 'SAT' || form.day === 'SUN';
     onSave({
       ...form,
       id: item?.id,
       start_time: form.start_time || null,
       end_time: form.end_time || null,
+      repeatCount: isRepeatable ? repeatCount : 1,
     });
   }
 
@@ -39,6 +42,8 @@ export default function EventModal({ mode, item, holidays, onSave, onDelete, onC
     { value: 'SUN', label: '일요일' },
     ...holidays.map(h => ({ value: h.date, label: `${h.name} (${h.date})` })),
   ];
+
+  const isRepeatable = form.day === 'SAT' || form.day === 'SUN';
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -56,6 +61,19 @@ export default function EventModal({ mode, item, holidays, onSave, onDelete, onC
             {dayOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </label>
+
+        {isRepeatable && mode === 'add' && (
+          <label className="modal-field">
+            <span>등록 횟수</span>
+            <input
+              type="number"
+              min="1"
+              max="52"
+              value={repeatCount}
+              onChange={e => setRepeatCount(Math.max(1, Math.min(52, Number(e.target.value))))}
+            />
+          </label>
+        )}
 
         <div className="modal-row">
           <label className="modal-field">
