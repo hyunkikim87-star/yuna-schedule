@@ -9,9 +9,9 @@ vi.mock('../db.js', () => ({
 const { default: app } = await import('../server.js');
 const { default: pool } = await import('../db.js');
 
-describe('GET /', () => {
+describe('GET /api/health', () => {
   it('returns { ok: true }', async () => {
-    const res = await request(app).get('/');
+    const res = await request(app).get('/api/health');
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ ok: true });
   });
