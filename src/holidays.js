@@ -94,7 +94,7 @@ function getAllHolidays(year) {
   return [...fixed, ...(LUNAR[year] ?? [])];
 }
 
-function getNthSaturday(year, month, week) {
+export function getNthSaturday(year, month, week) {
   const d = new Date(year, month - 1, 1);
   let count = 0;
   while (d.getMonth() === month - 1) {
