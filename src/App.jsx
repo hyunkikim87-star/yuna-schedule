@@ -1,14 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
-import ScheduleColumn from './components/ScheduleColumn';
-import ScheduleModal from './components/ScheduleModal';
+import AppBar from './components/AppBar';
+import WeekView from './components/WeekView';
+import EventModal from './components/EventModal';
+import { getHolidaysInWeek } from './holidays';
 import './App.css';
 
 function getWeekCount(year, month) {
-  const date = new Date(year, month - 1, 1);
+  const d = new Date(year, month - 1, 1);
   let count = 0;
-  while (date.getMonth() === month - 1) {
-    if (date.getDay() === 6) count++;
-    date.setDate(date.getDate() + 1);
+  while (d.getMonth() === month - 1) {
+    if (d.getDay() === 6) count++;
+    d.setDate(d.getDate() + 1);
   }
   return count || 4;
 }
@@ -16,14 +18,11 @@ function getWeekCount(year, month) {
 function getCurrentWeek(year, month) {
   const today = new Date();
   if (today.getFullYear() !== year || today.getMonth() + 1 !== month) return 1;
-  const date = new Date(year, month - 1, 1);
+  const d = new Date(year, month - 1, 1);
   let weekNum = 0;
-  while (date.getMonth() === month - 1) {
-    if (date.getDay() === 6) {
-      weekNum++;
-      if (date >= today) return weekNum;
-    }
-    date.setDate(date.getDate() + 1);
+  while (d.getMonth() === month - 1) {
+    if (d.getDay() === 6) { weekNum++; if (d >= today) return weekNum; }
+    d.setDate(d.getDate() + 1);
   }
   return Math.max(1, weekNum);
 }
@@ -34,20 +33,34 @@ export default function App() {
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [week, setWeek] = useState(() => getCurrentWeek(now.getFullYear(), now.getMonth() + 1));
   const [schedules, setSchedules] = useState([]);
-  const [modal, setModal] = useState(null); // null | { mode: 'add'|'edit', day: 'SAT'|'SUN', item?: {} }
+  const [modal, setModal] = useState(null); // null | { mode: 'add'|'edit', item?: {} }
 
   const weekCount = getWeekCount(year, month);
+  const holidays = getHolidaysInWeek(year, month, week);
 
   const fetchSchedules = useCallback(async () => {
     try {
       const res = await fetch(`/api/schedules?year=${year}&month=${month}&week=${week}`);
+      if (!res.ok) throw new Error();
       setSchedules(await res.json());
-    } catch (err) {
-      console.error('Failed to fetch schedules:', err);
-    }
+    } catch { console.error('Failed to fetch schedules'); }
   }, [year, month, week]);
 
   useEffect(() => { fetchSchedules(); }, [fetchSchedules]);
+
+  function prevWeek() {
+    if (week > 1) { setWeek(w => w - 1); return; }
+    const nm = month === 1 ? 12 : month - 1;
+    const ny = month === 1 ? year - 1 : year;
+    setYear(ny); setMonth(nm); setWeek(getWeekCount(ny, nm));
+  }
+
+  function nextWeek() {
+    if (week < weekCount) { setWeek(w => w + 1); return; }
+    const nm = month === 12 ? 1 : month + 1;
+    const ny = month === 12 ? year + 1 : year;
+    setYear(ny); setMonth(nm); setWeek(1);
+  }
 
   async function handleSave(data) {
     try {
@@ -65,68 +78,41 @@ export default function App() {
           body: JSON.stringify({ ...data, year, month, week }),
         });
       }
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok) throw new Error();
       setModal(null);
       fetchSchedules();
-    } catch (err) {
-      console.error('Failed to save schedule:', err);
-    }
+    } catch { console.error('Failed to save'); }
   }
 
   async function handleDelete(id) {
     try {
       const res = await fetch(`/api/schedules/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok) throw new Error();
       setModal(null);
       fetchSchedules();
-    } catch (err) {
-      console.error('Failed to delete schedule:', err);
-    }
+    } catch { console.error('Failed to delete'); }
   }
 
   return (
     <div className="app">
-      <header className="app-header">
-        <h1>유나 주말 일정</h1>
-        <div className="selectors">
-          <select value={year} onChange={e => { setYear(Number(e.target.value)); setWeek(1); }}>
-            {[now.getFullYear(), now.getFullYear() + 1].map(y => (
-              <option key={y} value={y}>{y}년</option>
-            ))}
-          </select>
-          <select value={month} onChange={e => { setMonth(Number(e.target.value)); setWeek(1); }}>
-            {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
-              <option key={m} value={m}>{m}월</option>
-            ))}
-          </select>
-          <select value={week} onChange={e => setWeek(Number(e.target.value))}>
-            {Array.from({ length: weekCount }, (_, i) => i + 1).map(w => (
-              <option key={w} value={w}>{w}주차</option>
-            ))}
-          </select>
-        </div>
-      </header>
-
-      <main className="schedule-grid">
-        <ScheduleColumn
-          label="토요일"
-          items={schedules.filter(s => s.day === 'SAT')}
-          onAdd={() => setModal({ mode: 'add', day: 'SAT' })}
-          onEdit={item => setModal({ mode: 'edit', day: item.day, item })}
-        />
-        <ScheduleColumn
-          label="일요일"
-          items={schedules.filter(s => s.day === 'SUN')}
-          onAdd={() => setModal({ mode: 'add', day: 'SUN' })}
-          onEdit={item => setModal({ mode: 'edit', day: item.day, item })}
-        />
-      </main>
-
+      <AppBar
+        year={year} month={month} week={week}
+        onYearChange={y => { setYear(y); setWeek(1); }}
+        onMonthChange={m => { setMonth(m); setWeek(1); }}
+        onPrevWeek={prevWeek}
+        onNextWeek={nextWeek}
+      />
+      <WeekView
+        schedules={schedules}
+        holidays={holidays}
+        onEdit={item => setModal({ mode: 'edit', item })}
+      />
+      <button className="fab" onClick={() => setModal({ mode: 'add' })}>+</button>
       {modal && (
-        <ScheduleModal
+        <EventModal
           mode={modal.mode}
-          day={modal.day}
           item={modal.item}
+          holidays={holidays}
           onSave={handleSave}
           onDelete={handleDelete}
           onClose={() => setModal(null)}
