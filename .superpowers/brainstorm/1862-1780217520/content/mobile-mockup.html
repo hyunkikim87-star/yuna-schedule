@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>유나 스케줄 - 모바일 목업</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #1a1a2e; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 24px 16px; font-family: -apple-system, sans-serif; }
+
+  .page-title { color: #fff; text-align: center; margin-bottom: 20px; font-size: 15px; opacity: 0.7; }
+
+  .phone {
+    width: 360px;
+    background: #fff;
+    border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+  }
+
+  /* 상단 앱바 */
+  .appbar {
+    background: #4285f4;
+    color: #fff;
+    padding: 14px 16px 10px;
+  }
+  .appbar-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .appbar-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .appbar-nav select {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: #fff;
+    font-size: 13px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    flex: 1;
+  }
+  .appbar-nav select option { color: #333; background: #fff; }
+  .nav-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: #fff;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .week-label {
+    font-size: 12px;
+    opacity: 0.85;
+    margin-top: 6px;
+  }
+
+  /* 캘린더 그리드 */
+  .calendar {
+    display: flex;
+    flex-direction: column;
+    height: 560px;
+    overflow-y: auto;
+  }
+
+  /* 요일 헤더 */
+  .day-headers {
+    display: flex;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  .time-gutter { width: 44px; flex-shrink: 0; }
+  .day-col-header {
+    flex: 1;
+    text-align: center;
+    padding: 8px 4px;
+    font-size: 12px;
+    font-weight: 600;
+    border-left: 1px solid #f0f0f0;
+  }
+  .day-col-header.sat { color: #4285f4; }
+  .day-col-header.sun { color: #ea4335; }
+  .day-col-header.holiday { color: #ea4335; background: #fff8f8; }
+  .day-date { font-size: 18px; font-weight: 700; display: block; line-height: 1.2; }
+  .day-name { font-size: 10px; opacity: 0.7; }
+  .holiday-tag {
+    font-size: 9px;
+    background: #fce8e6;
+    color: #ea4335;
+    padding: 1px 4px;
+    border-radius: 8px;
+    margin-top: 2px;
+    display: inline-block;
+  }
+
+  /* 타임 그리드 */
+  .grid-body {
+    display: flex;
+    flex: 1;
+    position: relative;
+  }
+  .time-col {
+    width: 44px;
+    flex-shrink: 0;
+    padding-top: 0;
+  }
+  .time-slot {
+    height: 56px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding-right: 6px;
+    padding-top: 2px;
+    font-size: 10px;
+    color: #999;
+    border-top: 1px solid #f0f0f0;
+  }
+  .day-col {
+    flex: 1;
+    border-left: 1px solid #f0f0f0;
+    position: relative;
+  }
+  .slot-line {
+    height: 56px;
+    border-top: 1px solid #f0f0f0;
+  }
+  .slot-line.half { border-top: 1px dashed #f5f5f5; height: 28px; }
+
+  /* 이벤트 블록 */
+  .event {
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    border-radius: 6px;
+    padding: 4px 6px;
+    font-size: 11px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  }
+  .event-name { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .event-time { font-size: 9px; opacity: 0.85; margin-top: 1px; }
+  .event-loc { font-size: 9px; opacity: 0.75; }
+
+  .event.green { background: #e8f5e9; border-left: 3px solid #34a853; color: #1b5e20; }
+  .event.red { background: #fce8e6; border-left: 3px solid #ea4335; color: #b71c1c; }
+  .event.yellow { background: #fff8e1; border-left: 3px solid #fbbc04; color: #5d4037; }
+  .event.purple { background: #f3e5f5; border-left: 3px solid #9c27b0; color: #4a148c; }
+
+  /* FAB */
+  .fab {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 52px;
+    height: 52px;
+    background: #4285f4;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    box-shadow: 0 4px 12px rgba(66,133,244,0.5);
+    cursor: pointer;
+    z-index: 20;
+  }
+</style>
+</head>
+<body>
+<div style="width:100%;max-width:400px;">
+  <p class="page-title">📱 모바일 목업 — 유나 스케줄 타임그리드</p>
+
+  <div class="phone">
+    <!-- 앱바 -->
+    <div class="appbar">
+      <div class="appbar-title">유나 수업 일정</div>
+      <div class="appbar-nav">
+        <select><option>2025년</option></select>
+        <select><option>6월</option></select>
+        <button class="nav-btn">◀</button>
+        <button class="nav-btn">▶</button>
+      </div>
+      <div class="week-label">3주차 · 6/14(토) ~ 6/15(일)</div>
+    </div>
+
+    <!-- 캘린더 -->
+    <div class="calendar" style="position:relative;">
+      <!-- 요일 헤더 (공휴일 없는 주) -->
+      <div class="day-headers">
+        <div class="time-gutter"></div>
+        <div class="day-col-header sat">
+          <span class="day-date">14</span>
+          <span class="day-name">토요일</span>
+        </div>
+        <div class="day-col-header sun">
+          <span class="day-date">15</span>
+          <span class="day-name">일요일</span>
+        </div>
+      </div>
+
+      <!-- 그리드 바디 -->
+      <div class="grid-body">
+        <!-- 시간 컬럼 -->
+        <div class="time-col">
+          <div class="time-slot">9시</div>
+          <div class="time-slot">10시</div>
+          <div class="time-slot">11시</div>
+          <div class="time-slot">12시</div>
+          <div class="time-slot">13시</div>
+          <div class="time-slot">14시</div>
+          <div class="time-slot">15시</div>
+          <div class="time-slot">16시</div>
+          <div class="time-slot">17시</div>
+        </div>
+
+        <!-- 토요일 -->
+        <div class="day-col">
+          <div class="slot-line"></div><div class="slot-line"></div><div class="slot-line"></div>
+          <div class="slot-line"></div><div class="slot-line"></div><div class="slot-line"></div>
+          <div class="slot-line"></div><div class="slot-line"></div><div class="slot-line"></div>
+          <!-- 발레 10:00~11:30 (top: 56px, height: 84px) -->
+          <div class="event green" style="top:56px;height:84px;">
+            <div class="event-name">🩰 발레</div>
+            <div class="event-time">10:00 ~ 11:30</div>
+            <div class="event-loc">예술의전당</div>
+          </div>
+          <!-- 피아노 13:00~14:00 (top: 224px, height: 56px) -->
+          <div class="event red" style="top:224px;height:56px;">
+            <div class="event-name">🎹 피아노</div>
+            <div class="event-time">13:00 ~ 14:00</div>
+          </div>
+        </div>
+
+        <!-- 일요일 -->
+        <div class="day-col">
+          <div class="slot-line"></div><div class="slot-line"></div><div class="slot-line"></div>
+          <div class="slot-line"></div><div class="slot-line"></div><div class="slot-line"></div>
+          <div class="slot-line"></div><div class="slot-line"></div><div class="slot-line"></div>
+          <!-- 미술 10:30~12:00 (top: 84px, height: 84px) -->
+          <div class="event yellow" style="top:84px;height:84px;">
+            <div class="event-name">🎨 미술</div>
+            <div class="event-time">10:30 ~ 12:00</div>
+            <div class="event-loc">미술학원</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAB -->
+      <div class="fab">+</div>
+    </div>
+
+    <!-- 공휴일 있는 주 예시 -->
+    <div style="background:#f8f9fa;padding:10px 12px;border-top:2px solid #4285f4;">
+      <div style="font-size:11px;color:#4285f4;font-weight:700;margin-bottom:6px;">공휴일 있는 주 예시 (광복절)</div>
+      <div style="display:flex;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #eee;">
+        <div style="width:36px;flex-shrink:0;"></div>
+        <div style="flex:1;text-align:center;padding:6px 2px;border-left:1px solid #f0f0f0;">
+          <div style="font-size:16px;font-weight:700;color:#ea4335;">15</div>
+          <div style="font-size:9px;color:#999;">금요일</div>
+          <span style="font-size:8px;background:#fce8e6;color:#ea4335;padding:1px 3px;border-radius:4px;">광복절</span>
+        </div>
+        <div style="flex:1;text-align:center;padding:6px 2px;border-left:1px solid #f0f0f0;">
+          <div style="font-size:16px;font-weight:700;color:#4285f4;">16</div>
+          <div style="font-size:9px;color:#999;">토요일</div>
+        </div>
+        <div style="flex:1;text-align:center;padding:6px 2px;border-left:1px solid #f0f0f0;">
+          <div style="font-size:16px;font-weight:700;color:#ea4335;">17</div>
+          <div style="font-size:9px;color:#999;">일요일</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

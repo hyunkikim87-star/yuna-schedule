@@ -1,0 +1,149 @@
+<h2>캘린더 UI 방향 — 어떤 레이아웃이 좋을까요?</h2>
+<p class="subtitle">3가지 방향을 비교해 보세요. 클릭해서 선택하세요.</p>
+
+<div class="cards">
+
+  <!-- Option A: Google Calendar 타임그리드 -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f8f9fa;padding:12px;font-family:sans-serif;font-size:12px;">
+      <div style="display:flex;border:1px solid #ddd;border-radius:6px;overflow:hidden;">
+        <div style="width:36px;background:#fff;border-right:1px solid #eee;padding-top:24px;">
+          <div style="height:40px;color:#999;font-size:10px;text-align:right;padding-right:4px;line-height:40px;">9시</div>
+          <div style="height:40px;color:#999;font-size:10px;text-align:right;padding-right:4px;line-height:40px;">10시</div>
+          <div style="height:40px;color:#999;font-size:10px;text-align:right;padding-right:4px;line-height:40px;">11시</div>
+          <div style="height:40px;color:#999;font-size:10px;text-align:right;padding-right:4px;line-height:40px;">12시</div>
+          <div style="height:40px;color:#999;font-size:10px;text-align:right;padding-right:4px;line-height:40px;">13시</div>
+        </div>
+        <div style="flex:1;border-right:1px solid #eee;">
+          <div style="background:#4285f4;color:#fff;text-align:center;padding:4px;font-weight:bold;font-size:11px;">토요일</div>
+          <div style="position:relative;height:200px;">
+            <div style="position:absolute;top:0;left:4px;right:4px;height:39px;border-bottom:1px solid #f0f0f0;"></div>
+            <div style="position:absolute;top:40px;left:4px;right:4px;height:39px;border-bottom:1px solid #f0f0f0;"></div>
+            <div style="position:absolute;top:80px;left:4px;right:4px;height:79px;border-bottom:1px solid #f0f0f0;"></div>
+            <div style="position:absolute;top:160px;left:4px;right:4px;height:39px;border-bottom:1px solid #f0f0f0;"></div>
+            <div style="position:absolute;top:8px;left:6px;right:6px;height:75px;background:#34a853;border-radius:4px;padding:4px;color:#fff;font-size:10px;">
+              <div style="font-weight:bold;">발레</div>
+              <div>10:00-11:30</div>
+              <div>예술의전당</div>
+            </div>
+            <div style="position:absolute;top:128px;left:6px;right:6px;height:60px;background:#ea4335;border-radius:4px;padding:4px;color:#fff;font-size:10px;">
+              <div style="font-weight:bold;">피아노</div>
+              <div>12:00-13:00</div>
+            </div>
+          </div>
+        </div>
+        <div style="flex:1;">
+          <div style="background:#5f6368;color:#fff;text-align:center;padding:4px;font-weight:bold;font-size:11px;">일요일</div>
+          <div style="position:relative;height:200px;">
+            <div style="position:absolute;top:0;left:4px;right:4px;height:39px;border-bottom:1px solid #f0f0f0;"></div>
+            <div style="position:absolute;top:40px;left:4px;right:4px;height:39px;border-bottom:1px solid #f0f0f0;"></div>
+            <div style="position:absolute;top:80px;left:4px;right:4px;height:79px;border-bottom:1px solid #f0f0f0;"></div>
+            <div style="position:absolute;top:160px;left:4px;right:4px;height:39px;border-bottom:1px solid #f0f0f0;"></div>
+            <div style="position:absolute;top:48px;left:6px;right:6px;height:55px;background:#fbbc04;border-radius:4px;padding:4px;color:#333;font-size:10px;">
+              <div style="font-weight:bold;">미술</div>
+              <div>10:30-11:30</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A. 타임그리드 (구글 캘린더형)</h3>
+      <p>시간축 기반 격자. 수업이 시간대에 맞게 배치됨. 직관적이지만 시작/종료 시간 데이터가 필요함.</p>
+    </div>
+  </div>
+
+  <!-- Option B: 주차별 카드 리스트 -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f8f9fa;padding:12px;font-family:sans-serif;font-size:12px;">
+      <div style="border:1px solid #ddd;border-radius:6px;overflow:hidden;">
+        <div style="background:#1a73e8;color:#fff;padding:8px 12px;font-weight:bold;">2025년 6월 · 3주차</div>
+        <div style="display:flex;gap:0;">
+          <div style="flex:1;border-right:1px solid #eee;padding:8px;">
+            <div style="font-weight:bold;color:#4285f4;margin-bottom:8px;font-size:11px;">🗓 토요일</div>
+            <div style="background:#e8f5e9;border-left:3px solid #34a853;border-radius:4px;padding:6px 8px;margin-bottom:6px;">
+              <div style="font-weight:bold;font-size:11px;">발레</div>
+              <div style="color:#666;font-size:10px;">예술의전당</div>
+              <div style="color:#888;font-size:10px;">발레슈즈 지참</div>
+            </div>
+            <div style="background:#fce8e6;border-left:3px solid #ea4335;border-radius:4px;padding:6px 8px;">
+              <div style="font-weight:bold;font-size:11px;">피아노</div>
+              <div style="color:#666;font-size:10px;">음악학원</div>
+            </div>
+          </div>
+          <div style="flex:1;padding:8px;">
+            <div style="font-weight:bold;color:#5f6368;margin-bottom:8px;font-size:11px;">🗓 일요일</div>
+            <div style="background:#fff8e1;border-left:3px solid #fbbc04;border-radius:4px;padding:6px 8px;">
+              <div style="font-weight:bold;font-size:11px;">미술</div>
+              <div style="color:#666;font-size:10px;">미술학원</div>
+              <div style="color:#888;font-size:10px;">도화지 A4</div>
+            </div>
+          </div>
+        </div>
+        <div style="border-top:1px solid #eee;padding:6px 12px;display:flex;gap:8px;">
+          <span style="font-size:10px;color:#999;">◀ 이전 주</span>
+          <span style="flex:1"></span>
+          <span style="font-size:10px;color:#999;">다음 주 ▶</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B. 주차별 카드뷰 (현재 + 개선)</h3>
+      <p>현재 구조 유지하면서 주 단위 이동 버튼 추가. 시간 데이터 불필요. 작업량 적음.</p>
+    </div>
+  </div>
+
+  <!-- Option C: 월간 캘린더 -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f8f9fa;padding:12px;font-family:sans-serif;font-size:12px;">
+      <div style="border:1px solid #ddd;border-radius:6px;overflow:hidden;">
+        <div style="background:#1a73e8;color:#fff;padding:8px 12px;font-weight:bold;display:flex;align-items:center;">
+          <span>◀</span><span style="flex:1;text-align:center;">2025년 6월</span><span>▶</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;">
+          <div style="padding:4px;font-size:10px;color:#999;">월</div>
+          <div style="padding:4px;font-size:10px;color:#999;">화</div>
+          <div style="padding:4px;font-size:10px;color:#999;">수</div>
+          <div style="padding:4px;font-size:10px;color:#999;">목</div>
+          <div style="padding:4px;font-size:10px;color:#999;">금</div>
+          <div style="padding:4px;font-size:10px;color:#4285f4;font-weight:bold;">토</div>
+          <div style="padding:4px;font-size:10px;color:#ea4335;font-weight:bold;">일</div>
+          <!-- row 1 -->
+          <div style="padding:4px;font-size:11px;color:#ccc;">26</div>
+          <div style="padding:4px;font-size:11px;color:#ccc;">27</div>
+          <div style="padding:4px;font-size:11px;color:#ccc;">28</div>
+          <div style="padding:4px;font-size:11px;color:#ccc;">29</div>
+          <div style="padding:4px;font-size:11px;color:#ccc;">30</div>
+          <div style="padding:3px;font-size:11px;color:#4285f4;">
+            31
+            <div style="background:#34a853;color:#fff;border-radius:2px;font-size:9px;padding:1px;margin-top:1px;">발레</div>
+          </div>
+          <div style="padding:3px;font-size:11px;color:#ea4335;">
+            1
+            <div style="background:#fbbc04;color:#333;border-radius:2px;font-size:9px;padding:1px;margin-top:1px;">미술</div>
+          </div>
+          <!-- row 2 -->
+          <div style="padding:4px;font-size:11px;">2</div>
+          <div style="padding:4px;font-size:11px;">3</div>
+          <div style="padding:4px;font-size:11px;">4</div>
+          <div style="padding:4px;font-size:11px;">5</div>
+          <div style="padding:4px;font-size:11px;">6</div>
+          <div style="padding:3px;font-size:11px;color:#4285f4;">
+            7
+            <div style="background:#34a853;color:#fff;border-radius:2px;font-size:9px;padding:1px;margin-top:1px;">발레</div>
+            <div style="background:#ea4335;color:#fff;border-radius:2px;font-size:9px;padding:1px;margin-top:1px;">피아노</div>
+          </div>
+          <div style="padding:3px;font-size:11px;color:#ea4335;">
+            8
+            <div style="background:#fbbc04;color:#333;border-radius:2px;font-size:9px;padding:1px;margin-top:1px;">미술</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C. 월간 캘린더뷰</h3>
+      <p>한 달 전체를 한눈에. 토/일에 수업 이름 표시, 클릭하면 상세 팝업. 가장 직관적이지만 작업량이 가장 많음.</p>
+    </div>
+  </div>
+
+</div>
