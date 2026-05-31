@@ -2,18 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import AppBar from './components/AppBar';
 import WeekView from './components/WeekView';
 import EventModal from './components/EventModal';
-import { getHolidaysInWeek } from './holidays';
+import { getHolidaysInWeek, getNthSaturday } from './holidays';
+import { getWeekCount, advanceWeek } from './scheduleUtils';
 import './App.css';
 
-function getWeekCount(year, month) {
-  const d = new Date(year, month - 1, 1);
-  let count = 0;
-  while (d.getMonth() === month - 1) {
-    if (d.getDay() === 6) count++;
-    d.setDate(d.getDate() + 1);
-  }
-  return count || 4;
-}
 
 function getCurrentWeek(year, month) {
   const today = new Date();
@@ -36,6 +28,8 @@ export default function App() {
   const [modal, setModal] = useState(null); // null | { mode: 'add'|'edit', item?: {} }
 
   const weekCount = getWeekCount(year, month);
+  const satDate = getNthSaturday(year, month, week);
+  const sunDate = satDate ? new Date(satDate.getTime() + 86400000) : null;
   const holidays = getHolidaysInWeek(year, month, week);
 
   const fetchSchedules = useCallback(async () => {
@@ -63,22 +57,27 @@ export default function App() {
   }
 
   async function handleSave(data) {
+    const { repeatCount = 1, ...scheduleData } = data;
     try {
-      let res;
-      if (data.id) {
-        res = await fetch(`/api/schedules/${data.id}`, {
+      if (scheduleData.id) {
+        const res = await fetch(`/api/schedules/${scheduleData.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
+          body: JSON.stringify(scheduleData),
         });
+        if (!res.ok) throw new Error();
       } else {
-        res = await fetch('/api/schedules', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...data, year, month, week }),
-        });
+        let y = year, m = month, w = week;
+        for (let i = 0; i < repeatCount; i++) {
+          const res = await fetch('/api/schedules', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...scheduleData, year: y, month: m, week: w }),
+          });
+          if (!res.ok) throw new Error();
+          ({ year: y, month: m, week: w } = advanceWeek(y, m, w));
+        }
       }
-      if (!res.ok) throw new Error();
       setModal(null);
       fetchSchedules();
     } catch { console.error('Failed to save'); }
@@ -105,6 +104,8 @@ export default function App() {
       <WeekView
         schedules={schedules}
         holidays={holidays}
+        satDate={satDate}
+        sunDate={sunDate}
         onEdit={item => setModal({ mode: 'edit', item })}
       />
       <button className="fab" onClick={() => setModal({ mode: 'add' })}>+</button>
