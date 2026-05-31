@@ -40,6 +40,19 @@ describe('POST /api/schedules', () => {
     expect(res.status).toBe(201);
     expect(res.body.class_name).toBe('미술');
   });
+
+  it('start_time, end_time을 포함해 생성한다', async () => {
+    const item = {
+      id: 3, year: 2026, month: 6, week: 1, day: 'SAT',
+      class_name: '발레', location: null, memo: null, supplies: null,
+      start_time: '10:00', end_time: '11:30',
+    };
+    pool.query.mockResolvedValueOnce({ rows: [item] });
+    const res = await request(app).post('/api/schedules').send(item);
+    expect(res.status).toBe(201);
+    expect(res.body.start_time).toBe('10:00');
+    expect(res.body.end_time).toBe('11:30');
+  });
 });
 
 describe('PUT /api/schedules/:id', () => {
@@ -51,6 +64,18 @@ describe('PUT /api/schedules/:id', () => {
     const res = await request(app).put('/api/schedules/1').send(updated);
     expect(res.status).toBe(200);
     expect(res.body.class_name).toBe('발레2');
+  });
+
+  it('start_time, end_time을 업데이트한다', async () => {
+    const updated = {
+      id: 1, class_name: '발레', location: null, memo: null, supplies: null,
+      start_time: '14:00', end_time: '15:30',
+    };
+    pool.query.mockResolvedValueOnce({ rows: [updated] });
+    const res = await request(app).put('/api/schedules/1').send(updated);
+    expect(res.status).toBe(200);
+    expect(res.body.start_time).toBe('14:00');
+    expect(res.body.end_time).toBe('15:30');
   });
 
   it('returns 404 if not found', async () => {
