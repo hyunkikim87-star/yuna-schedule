@@ -1,10 +1,10 @@
 // src/components/EventModal.jsx
 import { useState } from 'react';
 
-// 09:00 ~ 18:00, 30분 단위 (19개 옵션)
+// 09:00 ~ 18:00, 10분 단위 (55개 옵션)
 const TIME_OPTIONS = [''].concat(
-  Array.from({ length: 19 }, (_, i) => {
-    const total = 9 * 60 + i * 30;
+  Array.from({ length: 55 }, (_, i) => {
+    const total = 9 * 60 + i * 10;
     const h = Math.floor(total / 60);
     const m = total % 60;
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
