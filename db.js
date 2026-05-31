@@ -18,12 +18,19 @@ export async function initDb() {
       year       INTEGER      NOT NULL,
       month      INTEGER      NOT NULL,
       week       INTEGER      NOT NULL,
-      day        VARCHAR(3)   NOT NULL,
+      day        VARCHAR(10)  NOT NULL,
       class_name VARCHAR(100) NOT NULL,
       location   VARCHAR(100),
       memo       TEXT,
-      supplies   TEXT
+      supplies   TEXT,
+      start_time VARCHAR(5),
+      end_time   VARCHAR(5)
     )
+  `);
+  await pool.query(`
+    ALTER TABLE schedules
+      ADD COLUMN IF NOT EXISTS start_time VARCHAR(5),
+      ADD COLUMN IF NOT EXISTS end_time   VARCHAR(5)
   `);
 }
 
