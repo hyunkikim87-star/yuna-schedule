@@ -29,6 +29,7 @@ export async function initDb() {
   `);
   await pool.query(`ALTER TABLE schedules ADD COLUMN IF NOT EXISTS start_time VARCHAR(5)`);
   await pool.query(`ALTER TABLE schedules ADD COLUMN IF NOT EXISTS end_time VARCHAR(5)`);
+  await pool.query(`ALTER TABLE schedules ALTER COLUMN day TYPE VARCHAR(10)`);
 }
 
 export default pool;
