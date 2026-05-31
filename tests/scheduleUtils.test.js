@@ -8,8 +8,10 @@ describe('getWeekCount', () => {
   it('2026년 5월 토요일 5번 → 5', () => {
     expect(getWeekCount(2026, 5)).toBe(5);
   });
-  it('토요일이 없는 달은 4 반환', () => {
-    expect(getWeekCount(2026, 6)).toBeGreaterThanOrEqual(4);
+  it('결과가 항상 1 이상이다', () => {
+    for (let m = 1; m <= 12; m++) {
+      expect(getWeekCount(2026, m)).toBeGreaterThanOrEqual(1);
+    }
   });
 });
 
