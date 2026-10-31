@@ -1,13 +1,21 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest';
 import request from 'supertest';
+import { loggedInAgent, setTestAuthEnv } from './helpers.js';
 
 vi.mock('../db.js', () => ({
   default: { query: vi.fn() },
   initDb: vi.fn().mockResolvedValue(undefined),
 }));
 
+setTestAuthEnv();
 const { default: app } = await import('../server.js');
 const { default: pool } = await import('../db.js');
+
+// v2부터 /api/schedules도 PIN 로그인이 필요하다. 동작은 그대로인지 로그인한 상태로 확인한다.
+let agent;
+beforeAll(async () => {
+  agent = await loggedInAgent(request, app);
+});
 
 describe('GET /api/health', () => {
   it('returns { ok: true }', async () => {
@@ -24,7 +32,7 @@ describe('GET /api/schedules', () => {
     pool.query.mockResolvedValueOnce({
       rows: [{ id: 1, class_name: '발레', day: 'SAT', year: 2026, month: 6, week: 1 }],
     });
-    const res = await request(app).get('/api/schedules?year=2026&month=6&week=1');
+    const res = await agent.get('/api/schedules?year=2026&month=6&week=1');
     expect(res.status).toBe(200);
     expect(res.body[0].class_name).toBe('발레');
   });
@@ -36,7 +44,7 @@ describe('POST /api/schedules', () => {
   it('creates and returns a new schedule', async () => {
     const item = { id: 2, year: 2026, month: 6, week: 1, day: 'SAT', class_name: '미술', location: '롯데센터', memo: null, supplies: '앞치마' };
     pool.query.mockResolvedValueOnce({ rows: [item] });
-    const res = await request(app).post('/api/schedules').send(item);
+    const res = await agent.post('/api/schedules').send(item);
     expect(res.status).toBe(201);
     expect(res.body.class_name).toBe('미술');
   });
@@ -48,7 +56,7 @@ describe('POST /api/schedules', () => {
       start_time: '10:00', end_time: '11:30',
     };
     pool.query.mockResolvedValueOnce({ rows: [item] });
-    const res = await request(app).post('/api/schedules').send(item);
+    const res = await agent.post('/api/schedules').send(item);
     expect(res.status).toBe(201);
     expect(res.body.start_time).toBe('10:00');
     expect(res.body.end_time).toBe('11:30');
@@ -61,7 +69,7 @@ describe('PUT /api/schedules/:id', () => {
   it('updates and returns the schedule', async () => {
     const updated = { id: 1, class_name: '발레2', location: '새 장소', memo: null, supplies: null };
     pool.query.mockResolvedValueOnce({ rows: [updated] });
-    const res = await request(app).put('/api/schedules/1').send(updated);
+    const res = await agent.put('/api/schedules/1').send(updated);
     expect(res.status).toBe(200);
     expect(res.body.class_name).toBe('발레2');
   });
@@ -72,7 +80,7 @@ describe('PUT /api/schedules/:id', () => {
       start_time: '14:00', end_time: '15:30',
     };
     pool.query.mockResolvedValueOnce({ rows: [updated] });
-    const res = await request(app).put('/api/schedules/1').send(updated);
+    const res = await agent.put('/api/schedules/1').send(updated);
     expect(res.status).toBe(200);
     expect(res.body.start_time).toBe('14:00');
     expect(res.body.end_time).toBe('15:30');
@@ -80,7 +88,7 @@ describe('PUT /api/schedules/:id', () => {
 
   it('returns 404 if not found', async () => {
     pool.query.mockResolvedValueOnce({ rows: [] });
-    const res = await request(app).put('/api/schedules/999').send({ class_name: 'x' });
+    const res = await agent.put('/api/schedules/999').send({ class_name: 'x' });
     expect(res.status).toBe(404);
   });
 });
@@ -90,7 +98,7 @@ describe('DELETE /api/schedules/:id', () => {
 
   it('deletes and returns { ok: true }', async () => {
     pool.query.mockResolvedValueOnce({ rows: [] });
-    const res = await request(app).delete('/api/schedules/1');
+    const res = await agent.delete('/api/schedules/1');
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ ok: true });
   });
