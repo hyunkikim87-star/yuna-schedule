@@ -4,7 +4,7 @@ import { parseId, parseOneDayEvent } from '../lib/validate.js';
 
 const router = Router();
 
-const COLUMNS = ['name', 'date', 'start_time', 'end_time', 'location', 'supplies', 'memo', 'color'];
+const COLUMNS = ['name', 'date', 'start_time', 'end_time', 'location', 'supplies', 'memo', 'color', 'link'];
 
 router.get('/', async (_req, res) => {
   const { rows } = await pool.query('SELECT * FROM one_day_events ORDER BY date DESC, start_time, id');

@@ -4,6 +4,7 @@ import { mapUrl, sessionColor } from '../lib/colors.js';
 import { dateLabel, splitSupplies } from '../lib/time.js';
 import Sheet from './Sheet.jsx';
 import ChangeForm from './ChangeForm.jsx';
+import LinkButton from './LinkButton.jsx';
 
 // 회차 하나를 눌렀을 때: 정보 + 휴강 / 이 날만 변경 / 수업 정보, 원데이는 수정 / 삭제
 export default function SessionSheet({ session: s, onClose, onChanged, onEditOneDay, go }) {
@@ -61,6 +62,7 @@ export default function SessionSheet({ session: s, onClose, onChanged, onEditOne
         {supplies.length > 0 && <div className="info-row"><dt>준비물</dt><dd>{supplies.join(', ')}</dd></div>}
         {s.memo && <div className="info-row"><dt>메모</dt><dd style={{ fontWeight: 500 }}>{s.memo}</dd></div>}
       </dl>
+      {s.link && <LinkButton href={s.link} />}
       {s.overlap && <p className="form-error">같은 시간에 다른 수업이 있어요</p>}
       {error && <p className="form-error" role="alert">{error}</p>}
 
@@ -80,7 +82,7 @@ export default function SessionSheet({ session: s, onClose, onChanged, onEditOne
           <button type="button" className="ghost-btn" style={{ marginTop: 0 }} disabled={busy}
             onClick={() => onEditOneDay({
               id: s.source_id, name: s.name, date: s.date, start_time: s.start_time, end_time: s.end_time,
-              location: s.location, supplies: s.supplies, memo: s.memo, color: s.color,
+              location: s.location, supplies: s.supplies, memo: s.memo, color: s.color, link: s.link,
             })}>수정</button>
         </div>
       )}

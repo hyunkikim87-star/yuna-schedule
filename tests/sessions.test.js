@@ -92,6 +92,13 @@ describe('computeSessions', () => {
     expect(s.map((x) => [x.name, x.kind])).toEqual([['문화센터 특강', 'one_day'], ['와이즈미술학원', 'class']]);
   });
 
+  it('구매 링크가 회차에 실린다', () => {
+    const classes = [{ ...wise, link: 'https://example.com/wise' }];
+    const oneDayEvents = [{ id: 5, name: '특강', date: '2026-10-10', start_time: '09:00', link: 'https://example.com/event' }];
+    const s = computeSessions({ classes, oneDayEvents, from: '2026-10-10', to: '2026-10-10' });
+    expect(s.map((x) => x.link)).toEqual(['https://example.com/event', 'https://example.com/wise']);
+  });
+
   it('기간이 조회 범위 밖이면 회차가 없다', () => {
     expect(computeSessions({ classes: [wise], from: '2026-12-01', to: '2026-12-31' })).toEqual([]);
   });

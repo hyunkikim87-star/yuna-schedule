@@ -5,7 +5,7 @@ import { parseClass, parseException, parseId } from '../lib/validate.js';
 
 const router = Router();
 
-const COLUMNS = ['name', 'weekday', 'start_time', 'end_time', 'location', 'start_date', 'end_date', 'supplies', 'memo', 'color', 'term'];
+const COLUMNS = ['name', 'weekday', 'start_time', 'end_time', 'location', 'start_date', 'end_date', 'supplies', 'memo', 'color', 'term', 'link'];
 
 router.get('/', async (_req, res) => {
   const { rows } = await pool.query('SELECT * FROM classes ORDER BY start_date DESC, weekday, start_time, id');

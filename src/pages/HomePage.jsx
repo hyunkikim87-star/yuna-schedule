@@ -84,7 +84,9 @@ function DaySection({ date, sessions, onOpen, checked, onToggleSupply }) {
   );
 }
 
-export default function HomePage({ refreshKey, openSession }) {
+export default function HomePage({ refreshKey, openSession, go }) {
+  // 정규 수업은 수업 상세로, 원데이는 회차 시트로
+  const open = (s) => (s.kind === 'class' ? go(`/classes/${s.source_id}`) : openSession(s));
   const now = nowInSeoul(useNow());
   const [offset, setOffset] = useState(0);
   const [checked, setChecked] = useLocalState('yuna.supplies-checked', {});
@@ -127,10 +129,10 @@ export default function HomePage({ refreshKey, openSession }) {
         <>
           {offset === 0 && <StatusCard sessions={weekend} now={now} checked={checked} />}
           {weekdays.map((d) => (
-            <DaySection key={d} date={d} sessions={byDate(d)} onOpen={openSession} checked={checked} onToggleSupply={toggle} />
+            <DaySection key={d} date={d} sessions={byDate(d)} onOpen={open} checked={checked} onToggleSupply={toggle} />
           ))}
-          <DaySection date={sat} sessions={byDate(sat)} onOpen={openSession} checked={checked} onToggleSupply={toggle} />
-          <DaySection date={sun} sessions={byDate(sun)} onOpen={openSession} checked={checked} onToggleSupply={toggle} />
+          <DaySection date={sat} sessions={byDate(sat)} onOpen={open} checked={checked} onToggleSupply={toggle} />
+          <DaySection date={sun} sessions={byDate(sun)} onOpen={open} checked={checked} onToggleSupply={toggle} />
         </>
       )}
     </>

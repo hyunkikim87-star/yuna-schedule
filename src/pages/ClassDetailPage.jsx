@@ -6,6 +6,7 @@ import { addDays, dateLabel, nowInSeoul, shortDate, weekdayOf, WEEKDAYS } from '
 import { mapUrl, placeColor } from '../lib/colors.js';
 import Sheet from '../components/Sheet.jsx';
 import ChangeForm from '../components/ChangeForm.jsx';
+import LinkButton from '../components/LinkButton.jsx';
 import { ArrowRight, CalendarX, ChevronLeft, Clock } from '../components/Icons.jsx';
 
 const UPCOMING_COUNT = 6;
@@ -107,6 +108,8 @@ export default function ClassDetailPage({ id, refreshKey, changed, go, openForm 
         {c.supplies && <div className="info-row"><dt>준비물</dt><dd>{c.supplies}</dd></div>}
         {c.memo && <div className="info-row"><dt>메모</dt><dd style={{ fontWeight: 500 }}>{c.memo}</dd></div>}
       </dl>
+
+      {c.link && <LinkButton href={c.link} style={{ margin: '12px 20px 0' }} />}
 
       <div className="actions">
         <button type="button" className="action" onClick={() => setSheet('cancel')}><CalendarX size={22} color="#D22030" />휴강 추가</button>

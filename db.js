@@ -66,8 +66,6 @@ export async function initDb() {
       UNIQUE (class_id, date)
     )
   `);
-  // 그 날만 다른 준비물 (예: 첫 날만 '체스판')
-  await pool.query(`ALTER TABLE class_exceptions ADD COLUMN IF NOT EXISTS supplies TEXT`);
   await pool.query(`
     CREATE TABLE IF NOT EXISTS one_day_events (
       id         SERIAL PRIMARY KEY,
@@ -95,6 +93,13 @@ export async function initDb() {
       value TEXT        NOT NULL
     )
   `);
+
+  // 나중에 추가한 열. 테이블을 모두 만든 뒤에 둔다 (빈 DB에서도 순서대로 동작하게).
+  // 그 날만 다른 준비물 (예: 첫 날만 '체스판')
+  await pool.query(`ALTER TABLE class_exceptions ADD COLUMN IF NOT EXISTS supplies TEXT`);
+  // 수업 구매·신청 페이지 주소
+  await pool.query(`ALTER TABLE classes ADD COLUMN IF NOT EXISTS link TEXT`);
+  await pool.query(`ALTER TABLE one_day_events ADD COLUMN IF NOT EXISTS link TEXT`);
 }
 
 export default pool;

@@ -74,6 +74,25 @@ describe('/api/classes', () => {
     expect(pool.query).not.toHaveBeenCalled();
   });
 
+  it('구매 링크는 http(s) 주소만 저장하고, 비우면 null', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [wise] });
+    await agent.post('/api/classes').send({ ...wise, link: ' https://www.cultureclass.example/class/123 ' });
+    expect(pool.query.mock.calls[0][1].at(-1)).toBe('https://www.cultureclass.example/class/123');
+
+    pool.query.mockResolvedValueOnce({ rows: [wise] });
+    await agent.post('/api/classes').send({ ...wise, link: '' });
+    expect(pool.query.mock.calls[1][1].at(-1)).toBeNull();
+
+    for (const link of ['javascript:alert(1)', 'ftp://x.example/a', '그냥 글자']) {
+      const res = await agent.post('/api/classes').send({ ...wise, link });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatch(/구매 링크/);
+    }
+    const ev = await agent.post('/api/one-day-events').send({ name: '특강', date: '2026-11-07', start_time: '11:00', link: 'javascript:alert(1)' });
+    expect(ev.status).toBe(400);
+    expect(pool.query).toHaveBeenCalledTimes(2);
+  });
+
   it('기간 연장 = 종료일만 바꿔 PUT', async () => {
     pool.query.mockResolvedValueOnce({ rows: [{ ...wise, end_date: '2026-12-26' }] });
     const res = await agent.put('/api/classes/1').send({ ...wise, end_date: '2026-12-26' });

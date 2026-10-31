@@ -31,6 +31,7 @@ export default function ClassForm({ kind: initialKind = 'class', initial, onClos
   const [term, setTerm] = useState(initial?.term || '');
   const [supplies, setSupplies] = useState(initial?.supplies || '');
   const [memo, setMemo] = useState(initial?.memo || '');
+  const [link, setLink] = useState(initial?.link || '');
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
 
@@ -54,7 +55,7 @@ export default function ClassForm({ kind: initialKind = 'class', initial, onClos
     setError(null);
     if (!name.trim()) return setError('수업명을 입력해 주세요');
     setBusy(true);
-    const common = { name, start_time: start, end_time: end || null, location, supplies, memo };
+    const common = { name, start_time: start, end_time: end || null, location, supplies, memo, link };
     try {
       let saved;
       if (isClass) {
@@ -138,6 +139,8 @@ export default function ClassForm({ kind: initialKind = 'class', initial, onClos
 
       <TextField id="supplies" label="준비물" hint="(쉼표로 구분)" value={supplies} onChange={setSupplies} placeholder="예: 실내용 운동화, 물통" />
       <TextField id="memo" label="메모" hint="(선택)" value={memo} onChange={setMemo} multiline placeholder="예: 보호자 1인 동반" />
+      <TextField id="link" label="구매·신청 링크" hint="(선택)" value={link} onChange={setLink}
+        placeholder="https://" type="url" inputMode="url" autoComplete="off" />
 
       {error && <p className="form-error" role="alert">{error}</p>}
       <button type="button" className="primary-btn" disabled={busy} onClick={save}>
