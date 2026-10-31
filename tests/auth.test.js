@@ -40,7 +40,12 @@ describe('PIN 잠금', () => {
   it('health와 status는 로그인 없이 열린다', async () => {
     expect((await request(app).get('/api/health')).status).toBe(200);
     const res = await request(app).get('/api/auth/status');
-    expect(res.body).toMatchObject({ auth_enabled: true, logged_in: false });
+    expect(res.body).toMatchObject({ auth_enabled: true, logged_in: false, pin_length: 4 });
+  });
+
+  it('PIN을 6자리로 바꾸면 status의 pin_length도 6', async () => {
+    auth.setStoredHash(auth.hashPin('135790'));
+    expect((await request(app).get('/api/auth/status')).body.pin_length).toBe(6);
   });
 
   it('맞는 PIN → 30일짜리 HttpOnly 쿠키, 이후 API 사용 가능', async () => {

@@ -94,6 +94,13 @@ function getAllHolidays(year) {
   return [...fixed, ...(LUNAR[year] ?? [])];
 }
 
+// { 'YYYY-MM-DD': '공휴일명' } for the given years (달력 표시용)
+export function getHolidayMap(...years) {
+  const map = {};
+  for (const y of years) for (const h of getAllHolidays(y)) map[h.date] = h.name;
+  return map;
+}
+
 export function getNthSaturday(year, month, week) {
   const d = new Date(year, month - 1, 1);
   let count = 0;

@@ -17,9 +17,12 @@ router.get('/', async (req, res) => {
     'SELECT * FROM classes WHERE start_date <= $2 AND end_date >= $1',
     [from, to]
   );
-  const ids = classes.map((c) => c.id);
-  const { rows: exceptions } = ids.length
-    ? await pool.query('SELECT * FROM class_exceptions WHERE class_id = ANY($1) AND date BETWEEN $2 AND $3', [ids, from, to])
+  const { rows: exceptions } = classes.length
+    ? await pool.query(
+      `SELECT e.* FROM class_exceptions e JOIN classes c ON c.id = e.class_id
+       WHERE c.start_date <= $2 AND c.end_date >= $1 AND e.date BETWEEN $1 AND $2`,
+      [from, to]
+    )
     : { rows: [] };
   const { rows: oneDayEvents } = await pool.query(
     'SELECT * FROM one_day_events WHERE date BETWEEN $1 AND $2',

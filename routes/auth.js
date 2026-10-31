@@ -2,7 +2,7 @@ import { Router } from 'express';
 import pool from '../db.js';
 import {
   COOKIE_NAME, PIN_RE, authEnabled, cookieOptions, hashPin, isValidToken, issueToken,
-  lockRemainingMs, readCookie, setStoredHash, verifyPin,
+  lockRemainingMs, pinLength, readCookie, setStoredHash, verifyPin,
 } from '../lib/auth.js';
 
 const router = Router();
@@ -18,6 +18,7 @@ router.get('/status', (req, res) => {
     auth_enabled: enabled,
     logged_in: !enabled || isValidToken(readCookie(req, COOKIE_NAME)),
     locked_seconds: Math.ceil(lockRemainingMs() / 1000),
+    pin_length: pinLength(),
   });
 });
 

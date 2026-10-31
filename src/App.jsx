@@ -1,124 +1,90 @@
-import { useState, useEffect, useCallback } from 'react';
-import AppBar from './components/AppBar';
-import WeekView from './components/WeekView';
-import EventModal from './components/EventModal';
-import { getHolidaysInWeek, getNthSaturday } from './holidays';
-import { getWeekCount, advanceWeek } from './scheduleUtils';
-import './App.css';
-
-
-function getCurrentWeek(year, month) {
-  const today = new Date();
-  if (today.getFullYear() !== year || today.getMonth() + 1 !== month) return 1;
-  const d = new Date(year, month - 1, 1);
-  let weekNum = 0;
-  while (d.getMonth() === month - 1) {
-    if (d.getDay() === 6) { weekNum++; if (d >= today) return weekNum; }
-    d.setDate(d.getDate() + 1);
-  }
-  return Math.max(1, weekNum);
-}
+import { useCallback, useEffect, useState } from 'react';
+import { api, setUnauthorizedHandler } from './lib/api.js';
+import { useHashPath } from './lib/hooks.js';
+import PinScreen from './components/PinScreen.jsx';
+import TabBar from './components/TabBar.jsx';
+import ClassForm from './components/ClassForm.jsx';
+import SessionSheet from './components/SessionSheet.jsx';
+import { Plus } from './components/Icons.jsx';
+import HomePage from './pages/HomePage.jsx';
+import CalendarPage from './pages/CalendarPage.jsx';
+import ClassesPage from './pages/ClassesPage.jsx';
+import ClassDetailPage from './pages/ClassDetailPage.jsx';
+import SettingsPage from './pages/SettingsPage.jsx';
 
 export default function App() {
-  const now = new Date();
-  const [year, setYear] = useState(now.getFullYear());
-  const [month, setMonth] = useState(now.getMonth() + 1);
-  const [week, setWeek] = useState(() => getCurrentWeek(now.getFullYear(), now.getMonth() + 1));
-  const [schedules, setSchedules] = useState([]);
-  const [modal, setModal] = useState(null); // null | { mode: 'add'|'edit', item?: {} }
+  const [auth, setAuth] = useState({ checked: false, loggedIn: false, pinLength: 4 });
+  const [path, go] = useHashPath();
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [form, setForm] = useState(null); // { kind, initial } 수업 추가·수정 시트
+  const [openSession, setOpenSession] = useState(null); // 회차 시트
+  const [toast, setToast] = useState(null);
 
-  const weekCount = getWeekCount(year, month);
-  const satDate = getNthSaturday(year, month, week);
-  const sunDate = satDate ? new Date(satDate.getTime() + 86400000) : null;
-  const holidays = getHolidaysInWeek(year, month, week);
+  const checkAuth = useCallback(() => api.get('/api/auth/status')
+    .then((s) => setAuth({ checked: true, loggedIn: s.logged_in, pinLength: s.pin_length || 4 }))
+    .catch(() => setAuth((a) => ({ ...a, checked: true }))), []);
 
-  const fetchSchedules = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/schedules?year=${year}&month=${month}&week=${week}`);
-      if (!res.ok) throw new Error();
-      setSchedules(await res.json());
-    } catch { console.error('Failed to fetch schedules'); }
-  }, [year, month, week]);
+  useEffect(() => {
+    setUnauthorizedHandler(() => setAuth((a) => ({ ...a, loggedIn: false })));
+    checkAuth();
+  }, [checkAuth]);
 
-  useEffect(() => { fetchSchedules(); }, [fetchSchedules]);
+  const notify = useCallback((text) => {
+    setToast(text);
+    setTimeout(() => setToast(null), 2200);
+  }, []);
 
-  function prevWeek() {
-    if (week > 1) { setWeek(w => w - 1); return; }
-    const nm = month === 1 ? 12 : month - 1;
-    const ny = month === 1 ? year - 1 : year;
-    setYear(ny); setMonth(nm); setWeek(getWeekCount(ny, nm));
-  }
+  // 저장·삭제 뒤 모든 화면 다시 불러오기
+  const changed = useCallback((text) => {
+    setRefreshKey((k) => k + 1);
+    if (text) notify(text);
+  }, [notify]);
 
-  function nextWeek() {
-    if (week < weekCount) { setWeek(w => w + 1); return; }
-    const nm = month === 12 ? 1 : month + 1;
-    const ny = month === 12 ? year + 1 : year;
-    setYear(ny); setMonth(nm); setWeek(1);
-  }
+  if (!auth.checked) return <div className="loading">불러오는 중…</div>;
+  if (!auth.loggedIn) return <PinScreen length={auth.pinLength} onSuccess={checkAuth} />;
 
-  async function handleSave(data) {
-    const { repeatCount = 1, ...scheduleData } = data;
-    try {
-      if (scheduleData.id) {
-        const res = await fetch(`/api/schedules/${scheduleData.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(scheduleData),
-        });
-        if (!res.ok) throw new Error();
-      } else {
-        let y = year, m = month, w = week;
-        for (let i = 0; i < repeatCount; i++) {
-          const res = await fetch('/api/schedules', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...scheduleData, year: y, month: m, week: w }),
-          });
-          if (!res.ok) throw new Error();
-          ({ year: y, month: m, week: w } = advanceWeek(y, m, w));
-        }
-      }
-      setModal(null);
-      fetchSchedules();
-    } catch { console.error('Failed to save'); }
-  }
+  const ctx = { refreshKey, changed, notify, go, openForm: setForm, openSession: setOpenSession };
+  const detailMatch = path.match(/^\/classes\/(\d+)$/);
 
-  async function handleDelete(id) {
-    try {
-      const res = await fetch(`/api/schedules/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error();
-      setModal(null);
-      fetchSchedules();
-    } catch { console.error('Failed to delete'); }
-  }
+  let page;
+  if (detailMatch) page = <ClassDetailPage id={Number(detailMatch[1])} {...ctx} />;
+  else if (path.startsWith('/calendar')) page = <CalendarPage {...ctx} />;
+  else if (path.startsWith('/classes')) page = <ClassesPage {...ctx} />;
+  else if (path.startsWith('/settings')) page = <SettingsPage {...ctx} onLogout={checkAuth} />;
+  else page = <HomePage {...ctx} />;
+
+  const showFab = !detailMatch && !path.startsWith('/settings');
 
   return (
     <div className="app">
-      <AppBar
-        year={year} month={month} week={week}
-        onYearChange={y => { setYear(y); setWeek(1); }}
-        onMonthChange={m => { setMonth(m); setWeek(1); }}
-        onPrevWeek={prevWeek}
-        onNextWeek={nextWeek}
-      />
-      <WeekView
-        schedules={schedules}
-        holidays={holidays}
-        satDate={satDate}
-        sunDate={sunDate}
-        onEdit={item => setModal({ mode: 'edit', item })}
-      />
-      <button className="fab" onClick={() => setModal({ mode: 'add' })}>+</button>
-      {modal && (
-        <EventModal
-          mode={modal.mode}
-          item={modal.item}
-          holidays={holidays}
-          onSave={handleSave}
-          onDelete={handleDelete}
-          onClose={() => setModal(null)}
+      <main>{page}</main>
+      {showFab && (
+        <button type="button" className="fab" aria-label="수업 추가" onClick={() => setForm({ kind: 'class' })}>
+          <Plus size={26} stroke={2.4} />
+        </button>
+      )}
+      <TabBar path={path} />
+      {form && (
+        <ClassForm
+          {...form}
+          onClose={() => setForm(null)}
+          onSaved={(text, saved) => {
+            setForm(null);
+            changed(text);
+            if (saved?.goTo) go(saved.goTo);
+          }}
         />
       )}
+      {openSession && (
+        <SessionSheet
+          session={openSession}
+          onClose={() => setOpenSession(null)}
+          onChanged={(text) => { setOpenSession(null); changed(text); }}
+          onEditOneDay={(ev) => { setOpenSession(null); setForm({ kind: 'one_day', initial: ev }); }}
+          go={(p) => { setOpenSession(null); go(p); }}
+        />
+      )}
+      {toast && <div className="toast" role="status">{toast}</div>}
     </div>
   );
 }

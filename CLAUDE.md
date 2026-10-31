@@ -14,5 +14,8 @@
 ## 구조
 - 백엔드: Node + Express 5 (`server.js`, `routes/`), DB: PostgreSQL (`DATABASE_URL`, `db.js`)
 - 프론트: Vite + React 19 (`src/`), 빌드 결과 `dist/`를 Express가 정적 서빙
+  - 해시 라우팅(`#/`, `#/calendar`, `#/classes`, `#/classes/:id`, `#/settings`), 화면은 `src/pages/`, 공용은 `src/components/`
+  - 날짜 계산은 서버와 같은 `lib/sessions.js`를 import, 화면용 도우미는 `src/lib/time.js` (현재 시각은 인자로)
+  - 스타일은 `src/styles.css` 한 곳 (가계부 v2 토스 스타일 색·간격)
 - 배포: Railway, `railway.json` (NIXPACKS, `npm run build` → `node server.js`, 헬스체크 `/api/health`)
 - 테스트: `npm test` (vitest), 빌드: `npm run build`
