@@ -1,7 +1,7 @@
 // 링크 목록 JSON을 v2 서버의 수업에 넣는다 (수업마다 PUT으로 link만 바꿈).
-// 사용법: node scripts/links/apply.js <서버 주소> backup/links_from_sheet.json   (PIN은 화면에 보이지 않게 입력)
+// 사용법: node scripts/links/apply.js <서버 주소> backup/links_from_sheet.json [--production]   (PIN은 화면에 보이지 않게 입력)
 // 목록 형식: { items: [{ kind: 'class'|'one_day', date, start_time, name, link }] }
-// - 운영 주소로는 실행하지 않는다. 짝이 애매한 항목은 건너뛰고 목록으로 알려준다.
+// - 운영 주소는 --production을 붙였을 때만. 짝이 애매한 항목은 건너뛰고 목록으로 알려준다.
 import { readFileSync } from 'node:fs';
 import { askHidden } from '../lib/prompt.js';
 import { matchLinks } from './match.js';
@@ -11,14 +11,16 @@ const CLASS_FIELDS = ['name', 'weekday', 'start_time', 'end_time', 'location', '
 const EVENT_FIELDS = ['name', 'date', 'start_time', 'end_time', 'location', 'supplies', 'memo', 'color'];
 const pick = (o, keys) => Object.fromEntries(keys.map((k) => [k, o[k] ?? null]));
 
-const [base, listPath] = process.argv.slice(2);
+const args = process.argv.slice(2);
+const allowProduction = args.includes('--production');
+const [base, listPath] = args.filter((a) => !a.startsWith('--'));
 if (!base || !listPath) {
-  console.error('사용법: node scripts/links/apply.js <서버 주소> backup/links_from_sheet.json');
+  console.error('사용법: node scripts/links/apply.js <서버 주소> backup/links_from_sheet.json [--production]');
   process.exit(1);
 }
 const url = new URL(base);
-if (PRODUCTION_HOSTS.includes(url.hostname)) {
-  console.error(`운영 주소(${url.hostname})에는 넣지 않아요. 테스트 서버 주소를 주세요.`);
+if (PRODUCTION_HOSTS.includes(url.hostname) && !allowProduction) {
+  console.error(`운영 주소(${url.hostname})예요. 운영에 넣을 때만 --production을 붙여 실행하세요.`);
   process.exit(1);
 }
 const { items } = JSON.parse(readFileSync(listPath, 'utf8'));

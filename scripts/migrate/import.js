@@ -1,6 +1,6 @@
 // preview.js가 만든 migration_plan.json을 v2 서버의 API로 넣고, 넣은 뒤 회차를 다시 읽어 원본과 대조한다.
-// 사용법: node scripts/migrate/import.js <서버 주소> backup/migration_plan.json   (PIN은 화면에 보이지 않게 입력)
-// - 운영 주소로는 실행하지 않는다. 대상에 이미 수업이 있으면 멈춘다 (덮어쓰지 않음).
+// 사용법: node scripts/migrate/import.js <서버 주소> backup/migration_plan.json [--production]   (PIN은 화면에 보이지 않게 입력)
+// - 운영 주소는 --production을 붙였을 때만 (운영 전환 때 한 번). 대상에 이미 수업이 있으면 멈춘다 (덮어쓰지 않음).
 // - DB에 직접 접근하지 않고, 예전 schedules 테이블은 읽지도 바꾸지도 않는다.
 import { readFileSync } from 'node:fs';
 import { addDays } from '../../lib/sessions.js';
@@ -12,14 +12,16 @@ const CLASS_FIELDS = ['name', 'weekday', 'start_time', 'end_time', 'location', '
 const EVENT_FIELDS = ['name', 'date', 'start_time', 'end_time', 'location', 'supplies', 'memo'];
 const pick = (o, keys) => Object.fromEntries(keys.map((k) => [k, o[k] ?? null]));
 
-const [base, planPath] = process.argv.slice(2);
+const args = process.argv.slice(2);
+const allowProduction = args.includes('--production');
+const [base, planPath] = args.filter((a) => !a.startsWith('--'));
 if (!base || !planPath) {
-  console.error('사용법: node scripts/migrate/import.js <서버 주소> backup/migration_plan.json');
+  console.error('사용법: node scripts/migrate/import.js <서버 주소> backup/migration_plan.json [--production]');
   process.exit(1);
 }
 const url = new URL(base);
-if (PRODUCTION_HOSTS.includes(url.hostname)) {
-  console.error(`운영 주소(${url.hostname})에는 넣지 않아요. 테스트 서버 주소를 주세요.`);
+if (PRODUCTION_HOSTS.includes(url.hostname) && !allowProduction) {
+  console.error(`운영 주소(${url.hostname})예요. 운영 전환 때만 --production을 붙여 실행하세요.`);
   process.exit(1);
 }
 const plan = JSON.parse(readFileSync(planPath, 'utf8'));
