@@ -51,6 +51,13 @@ describe('computeSessions', () => {
     expect(s.filter((x) => x.date !== '2026-10-24').every((x) => x.start_time === '10:00')).toBe(true);
   });
 
+  it('이 날만 준비물 → 그 회차만 준비물이 바뀐다', () => {
+    const exceptions = [{ id: 9, class_id: 1, date: '2026-10-10', type: 'change', supplies: '체스판' }];
+    const s = computeSessions({ classes: [wise], exceptions, from: '2026-10-01', to: '2026-10-17' });
+    expect(s.map((x) => x.supplies)).toEqual(['앞치마', '체스판', '앞치마']);
+    expect(s[1].start_time).toBe('10:00');
+  });
+
   it('종료일 연장 → 회차가 늘어난다', () => {
     const before = computeSessions({ classes: [wise], from: '2026-10-01', to: '2026-12-31' });
     const after = computeSessions({ classes: [{ ...wise, end_date: '2026-11-21' }], from: '2026-10-01', to: '2026-12-31' });

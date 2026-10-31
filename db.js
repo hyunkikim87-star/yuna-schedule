@@ -66,6 +66,8 @@ export async function initDb() {
       UNIQUE (class_id, date)
     )
   `);
+  // 그 날만 다른 준비물 (예: 첫 날만 '체스판')
+  await pool.query(`ALTER TABLE class_exceptions ADD COLUMN IF NOT EXISTS supplies TEXT`);
   await pool.query(`
     CREATE TABLE IF NOT EXISTS one_day_events (
       id         SERIAL PRIMARY KEY,

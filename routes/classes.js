@@ -67,13 +67,13 @@ router.post('/:id/exceptions', async (req, res) => {
     return res.status(400).json({ error: '그 날짜에는 이 수업이 없어요' });
   }
   const { rows } = await pool.query(
-    `INSERT INTO class_exceptions (class_id, date, type, start_time, end_time, location, memo)
-     VALUES ($1,$2,$3,$4,$5,$6,$7)
+    `INSERT INTO class_exceptions (class_id, date, type, start_time, end_time, location, memo, supplies)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
      ON CONFLICT (class_id, date) DO UPDATE SET
        type=EXCLUDED.type, start_time=EXCLUDED.start_time, end_time=EXCLUDED.end_time,
-       location=EXCLUDED.location, memo=EXCLUDED.memo
+       location=EXCLUDED.location, memo=EXCLUDED.memo, supplies=EXCLUDED.supplies
      RETURNING *`,
-    [id, value.date, value.type, value.start_time, value.end_time, value.location, value.memo]
+    [id, value.date, value.type, value.start_time, value.end_time, value.location, value.memo, value.supplies]
   );
   res.status(201).json(rows[0]);
 });

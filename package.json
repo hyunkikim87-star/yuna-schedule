@@ -11,7 +11,9 @@
     "start": "node server.js",
     "build:start": "npm run build && node server.js",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "migrate:preview": "node scripts/migrate/preview.js",
+    "migrate:import": "node scripts/migrate/import.js"
   },
   "dependencies": {
     "express": "^5.2.1",
