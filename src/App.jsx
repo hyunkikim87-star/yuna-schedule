@@ -10,6 +10,7 @@ import HomePage from './pages/HomePage.jsx';
 import CalendarPage from './pages/CalendarPage.jsx';
 import ClassesPage from './pages/ClassesPage.jsx';
 import ClassDetailPage from './pages/ClassDetailPage.jsx';
+import OneDayDetailPage from './pages/OneDayDetailPage.jsx';
 import SettingsPage from './pages/SettingsPage.jsx';
 
 export default function App() {
@@ -45,15 +46,17 @@ export default function App() {
 
   const ctx = { refreshKey, changed, notify, go, openForm: setForm, openSession: setOpenSession };
   const detailMatch = path.match(/^\/classes\/(\d+)$/);
+  const oneDayMatch = path.match(/^\/one-day\/(\d+)$/);
 
   let page;
   if (detailMatch) page = <ClassDetailPage id={Number(detailMatch[1])} {...ctx} />;
+  else if (oneDayMatch) page = <OneDayDetailPage id={Number(oneDayMatch[1])} {...ctx} />;
   else if (path.startsWith('/calendar')) page = <CalendarPage {...ctx} />;
   else if (path.startsWith('/classes')) page = <ClassesPage {...ctx} />;
   else if (path.startsWith('/settings')) page = <SettingsPage {...ctx} onLogout={checkAuth} />;
   else page = <HomePage {...ctx} />;
 
-  const showFab = !detailMatch && !path.startsWith('/settings');
+  const showFab = !detailMatch && !oneDayMatch && !path.startsWith('/settings');
 
   return (
     <div className="app">

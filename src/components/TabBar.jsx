@@ -8,7 +8,8 @@ const TABS = [
 ];
 
 export default function TabBar({ path }) {
-  const active = (p) => (p === '/' ? path === '/' : path.startsWith(p));
+  // 원데이 상세(#/one-day/:id)는 수업 탭에 속한다
+  const active = (p) => (p === '/' ? path === '/' : path.startsWith(p) || (p === '/classes' && path.startsWith('/one-day')));
   return (
     <nav className="tabbar" aria-label="하단 탭">
       <ul>

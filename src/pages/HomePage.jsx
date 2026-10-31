@@ -84,9 +84,9 @@ function DaySection({ date, sessions, onOpen, checked, onToggleSupply }) {
   );
 }
 
-export default function HomePage({ refreshKey, openSession, go }) {
-  // 정규 수업은 수업 상세로, 원데이는 회차 시트로
-  const open = (s) => (s.kind === 'class' ? go(`/classes/${s.source_id}`) : openSession(s));
+export default function HomePage({ refreshKey, go }) {
+  // 정규 수업은 수업 상세로, 원데이는 원데이 상세로
+  const open = (s) => go(s.kind === 'class' ? `/classes/${s.source_id}` : `/one-day/${s.source_id}`);
   const now = nowInSeoul(useNow());
   const [offset, setOffset] = useState(0);
   const [checked, setChecked] = useLocalState('yuna.supplies-checked', {});

@@ -19,7 +19,7 @@ function Group({ title, items, render }) {
 
 const timeRange = (x) => `${x.start_time}${x.end_time ? `–${x.end_time}` : ''}`;
 
-export default function ClassesPage({ refreshKey, go, openSession }) {
+export default function ClassesPage({ refreshKey, go }) {
   const today = nowInSeoul().date;
   const [tab, setTab] = useLocalState('yuna.classes-tab', 'class');
   const [showPast, setShowPast] = useState(false);
@@ -39,8 +39,7 @@ export default function ClassesPage({ refreshKey, go, openSession }) {
   );
 
   const eventRow = (e) => (
-    <button key={e.id} type="button" className="list-item"
-      onClick={() => openSession({ ...e, kind: 'one_day', source_id: e.id, exception_id: null, changed: false, overlap: false })}>
+    <button key={e.id} type="button" className="list-item" onClick={() => go(`/one-day/${e.id}`)}>
       <span className="dot lg" style={{ background: e.color || placeColor(e.location) }} />
       <span className="list-main">
         <span className="list-title">{e.name}</span>

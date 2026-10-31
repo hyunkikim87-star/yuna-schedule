@@ -153,6 +153,17 @@ describe('/api/one-day-events, /api/places', () => {
     expect((await agent.post('/api/one-day-events').send({ ...event, date: '2026-13-01' })).status).toBe(400);
   });
 
+  it('원데이 수업 하나 조회, 없으면 404', async () => {
+    pool.query.mockResolvedValueOnce({ rows: [{ id: 3, name: '컬러 몬스터', date: '2026-11-01' }] });
+    const res = await agent.get('/api/one-day-events/3');
+    expect(res.status).toBe(200);
+    expect(res.body.name).toBe('컬러 몬스터');
+    expect(pool.query.mock.calls[0][1]).toEqual([3]);
+    pool.query.mockResolvedValueOnce({ rows: [] });
+    expect((await agent.get('/api/one-day-events/999')).status).toBe(404);
+    expect((await agent.get('/api/one-day-events/abc')).status).toBe(404);
+  });
+
   it('장소 등록, 같은 이름이면 409', async () => {
     pool.query.mockResolvedValueOnce({ rows: [{ id: 1, name: '이마트 수지', map_url: null }] });
     expect((await agent.post('/api/places').send({ name: '이마트 수지' })).status).toBe(201);
