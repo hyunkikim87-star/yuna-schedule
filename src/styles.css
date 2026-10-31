@@ -22,7 +22,7 @@
   --radius-item: 14px;
   --gutter: 20px;
   --tabbar: 64px;
-  --font: Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+  --font: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
 }
 
 * { box-sizing: border-box; }
