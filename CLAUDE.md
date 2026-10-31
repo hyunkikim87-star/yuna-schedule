@@ -19,5 +19,6 @@
   - 스타일은 `src/styles.css` 한 곳 (가계부 v2 토스 스타일 색·간격)
 - 배포: Railway, `railway.json` (NIXPACKS, `npm run build` → `node server.js`, 헬스체크 `/api/health`)
 - 테스트: `npm test` (vitest), 빌드: `npm run build`
+- PIN을 잊었을 때: Railway web 서비스에 `APP_PIN_RESET=true`를 넣고 재시작 → 앱에서 바꾼 PIN(DB)이 지워지고 `APP_PIN_HASH` PIN으로 돌아감 → 그 변수는 바로 삭제
 - 데이터 옮기기(1-3): `npm run migrate:preview -- backup/schedules_*.json` → 표 확인 → `npm run migrate:import -- <테스트 서버 주소> backup/migration_plan.json`
   - 이름·장소 통일 목록은 `scripts/migrate/renames.json` (사용자 확인 후 `confirmed: true`), import는 운영 주소·비어 있지 않은 DB에서 멈춘다

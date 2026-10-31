@@ -27,21 +27,39 @@ describe('GET /api/sessions', () => {
     pool.query
       .mockResolvedValueOnce({ rows: [wise] })
       .mockResolvedValueOnce({ rows: [{ id: 7, class_id: 1, date: '2026-10-24', type: 'cancel' }] })
-      .mockResolvedValueOnce({ rows: [{ id: 3, name: '특강', date: '2026-10-25', start_time: '15:00', end_time: null }] });
+      .mockResolvedValueOnce({ rows: [{ id: 3, name: '특강', date: '2026-10-25', start_time: '15:00', end_time: null }] })
+      .mockResolvedValueOnce({ rows: [{ date: '2026-10-31', kind: 'class', source_id: 1, item: '앞치마' }] });
     const res = await agent.get('/api/sessions?from=2026-10-24&to=2026-11-01');
     expect(res.status).toBe(200);
-    expect(res.body.map((s) => [s.date, s.name, s.kind])).toEqual([
-      ['2026-10-25', '특강', 'one_day'],
-      ['2026-10-31', '와이즈미술학원', 'class'],
+    expect(res.body.map((s) => [s.date, s.name, s.kind, s.checked_supplies])).toEqual([
+      ['2026-10-25', '특강', 'one_day', []],
+      ['2026-10-31', '와이즈미술학원', 'class', ['앞치마']],
     ]);
     expect(pool.query.mock.calls[0][1]).toEqual(['2026-10-24', '2026-11-01']);
   });
 
   it('수업이 없으면 예외 조회를 건너뛴다', async () => {
-    pool.query.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rows: [] });
+    pool.query.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rows: [] });
     const res = await agent.get('/api/sessions?from=2026-10-31&to=2026-11-01');
     expect(res.body).toEqual([]);
+    expect(pool.query).toHaveBeenCalledTimes(3);
+  });
+
+  it('준비물 챙김 켜기/끄기, 잘못된 값은 400', async () => {
+    pool.query.mockResolvedValue({ rows: [] });
+    const on = await agent.post('/api/sessions/supply-check').send({ date: '2026-10-31', kind: 'class', source_id: 1, item: ' 물통 ', checked: true });
+    expect(on.status).toBe(200);
+    expect(pool.query.mock.calls[0][0]).toMatch(/INSERT INTO supply_checks/);
+    expect(pool.query.mock.calls[0][1]).toEqual(['2026-10-31', 'class', 1, '물통']);
+    const off = await agent.post('/api/sessions/supply-check').send({ date: '2026-10-31', kind: 'class', source_id: 1, item: '물통', checked: false });
+    expect(off.status).toBe(200);
+    expect(pool.query.mock.calls[1][0]).toMatch(/DELETE FROM supply_checks/);
+    for (const bad of [{ kind: 'x' }, { source_id: 0 }, { item: '' }, { date: '2026-13-01' }]) {
+      const res = await agent.post('/api/sessions/supply-check').send({ date: '2026-10-31', kind: 'class', source_id: 1, item: '물통', checked: true, ...bad });
+      expect(res.status).toBe(400);
+    }
     expect(pool.query).toHaveBeenCalledTimes(2);
+    pool.query.mockReset();
   });
 
   it('날짜 형식이 틀리거나 범위가 거꾸로면 400', async () => {

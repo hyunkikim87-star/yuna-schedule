@@ -4,6 +4,7 @@ import { useFetch, useNow } from '../lib/hooks.js';
 import { dateLabel, nowInSeoul, splitSupplies } from '../lib/time.js';
 import { mapUrl, placeColor } from '../lib/colors.js';
 import LinkButton from '../components/LinkButton.jsx';
+import ConfirmSheet from '../components/ConfirmSheet.jsx';
 import { ChevronLeft } from '../components/Icons.jsx';
 
 // 원데이(하루짜리) 수업 상세: 정보 + 구매 링크 + 수정·삭제
@@ -12,6 +13,7 @@ export default function OneDayDetailPage({ id, refreshKey, changed, go, openForm
   const { data: e, error } = useFetch(`/api/one-day-events/${id}`, refreshKey);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState(null);
+  const [confirming, setConfirming] = useState(false);
 
   const back = () => (window.history.length > 1 ? window.history.back() : go('/classes'));
 
@@ -22,7 +24,6 @@ export default function OneDayDetailPage({ id, refreshKey, changed, go, openForm
   const status = e.date < today ? '지난 수업' : e.date === today ? '오늘' : null;
 
   async function remove() {
-    if (!window.confirm(`'${e.name}'을(를) 지울까요?`)) return;
     setBusy(true);
     try {
       await api.del(`/api/one-day-events/${e.id}`);
@@ -67,8 +68,12 @@ export default function OneDayDetailPage({ id, refreshKey, changed, go, openForm
       {err && <p className="form-error" style={{ margin: '12px 20px 0' }} role="alert">{err}</p>}
 
       <div style={{ padding: '28px 20px 0' }}>
-        <button type="button" className="ghost-btn red" onClick={remove} disabled={busy}>이 원데이 수업 삭제</button>
+        <button type="button" className="ghost-btn red" onClick={() => setConfirming(true)} disabled={busy}>이 원데이 수업 삭제</button>
       </div>
+      {confirming && (
+        <ConfirmSheet title="원데이 수업 삭제" busy={busy} onConfirm={remove} onClose={() => setConfirming(false)}
+          message={`${dateLabel(e.date)} '${e.name}' 수업을 지울까요? 되돌릴 수 없어요.`} />
+      )}
     </>
   );
 }

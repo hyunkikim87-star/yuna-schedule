@@ -60,6 +60,7 @@ export default function PinScreen({ onSuccess, length = PIN_LENGTH }) {
             </button>
           )))}
       </div>
+      <p className="pin-help">PIN이 생각나지 않으면 앱을 관리하는 사람에게 재설정을 부탁하세요</p>
     </main>
   );
 }

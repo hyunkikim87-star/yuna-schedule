@@ -5,7 +5,7 @@ import { sessionColor } from '../lib/colors.js';
 import { getHolidayMap } from '../holidays.js';
 import { ChevronLeft, ChevronRight } from '../components/Icons.jsx';
 
-export default function CalendarPage({ refreshKey, openSession }) {
+export default function CalendarPage({ refreshKey, go }) {
   const today = nowInSeoul(useNow()).date;
   const [ym, setYm] = useState(() => ({ year: Number(today.slice(0, 4)), month: Number(today.slice(5, 7)) }));
   const [picked, setPicked] = useState(today);
@@ -64,7 +64,7 @@ export default function CalendarPage({ refreshKey, openSession }) {
             const list = byDate[d] || [];
             const wd = weekdayOf(d);
             const colors = [...new Set(list.map(sessionColor))].slice(0, 3);
-            const cls = ['cal-day', list.length && 'has', wd === 0 && 'sun', wd === 6 && 'sat', holidays[d] && 'holiday', d === today && 'today']
+            const cls = ['cal-day', list.length && 'has', wd === 0 && 'sun', wd === 6 && 'sat', holidays[d] && 'holiday', d === today && 'today', d < today && 'past']
               .filter(Boolean).join(' ');
             const label = `${dateLabel(d)}${holidays[d] ? `, ${holidays[d]}` : ''}${list.length ? `, 수업 ${list.length}개` : ''}`;
             return (
@@ -85,7 +85,7 @@ export default function CalendarPage({ refreshKey, openSession }) {
         </div>
         {data && pickedList.length === 0 && <p style={{ padding: '20px 0 28px', textAlign: 'center', fontSize: 15, color: 'var(--sub)' }}>수업 없는 날이에요</p>}
         {pickedList.map((s) => (
-          <button key={`${s.kind}-${s.source_id}`} type="button" className="day-item" onClick={() => openSession(s)}>
+          <button key={`${s.kind}-${s.source_id}`} type="button" className="day-item" onClick={() => go(s.kind === 'class' ? `/classes/${s.source_id}` : `/one-day/${s.source_id}`)}>
             <span className="session-time" style={{ width: 48 }}>
               <span className="session-start" style={{ fontSize: 16 }}>{s.start_time}</span>
               {s.end_time && <span className="session-end" style={{ fontSize: 13 }}>{s.end_time}</span>}

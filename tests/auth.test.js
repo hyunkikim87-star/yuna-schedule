@@ -143,6 +143,23 @@ describe('PIN 변경', () => {
     expect(res.status).toBe(401);
   });
 
+  it('APP_PIN_RESET=true면 앱에서 바꾼 PIN을 지우고 환경변수 PIN으로 돌아간다', async () => {
+    auth.setStoredHash(auth.hashPin('8642'));
+    process.env.APP_PIN_RESET = 'true';
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      pool.query.mockResolvedValueOnce({ rows: [] });
+      const { loadStoredPinHash } = await import('../routes/auth.js');
+      await loadStoredPinHash();
+      expect(pool.query.mock.calls[0][0]).toMatch(/DELETE FROM app_settings WHERE key = 'pin_hash'/);
+      expect((await login('8642')).status).toBe(401);
+      expect((await login(TEST_PIN)).status).toBe(200);
+    } finally {
+      delete process.env.APP_PIN_RESET;
+      warn.mockRestore();
+    }
+  });
+
   it('앱에서 바꾼 PIN(DB 값)이 환경변수보다 우선한다', async () => {
     pool.query.mockResolvedValueOnce({ rows: [{ value: auth.hashPin('8642') }] });
     const { loadStoredPinHash } = await import('../routes/auth.js');

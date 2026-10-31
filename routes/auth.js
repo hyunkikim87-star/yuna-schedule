@@ -60,7 +60,15 @@ router.post('/change-pin', async (req, res) => {
   res.json({ ok: true });
 });
 
+// 앱에서 바꾼 PIN(DB)을 읽는다. PIN을 잊었을 때는 Railway 환경변수 APP_PIN_RESET=true로 한 번 재시작하면
+// DB의 PIN을 지우고 APP_PIN_HASH(환경변수)의 PIN으로 돌아간다. 재시작 뒤 APP_PIN_RESET은 지운다.
 export async function loadStoredPinHash() {
+  if (process.env.APP_PIN_RESET === 'true') {
+    await pool.query(`DELETE FROM app_settings WHERE key = 'pin_hash'`);
+    console.warn('APP_PIN_RESET=true: 앱에서 바꾼 PIN을 지우고 APP_PIN_HASH로 돌아갑니다. 이 환경변수는 지워 주세요.');
+    setStoredHash(null);
+    return;
+  }
   const { rows } = await pool.query(`SELECT value FROM app_settings WHERE key = 'pin_hash'`);
   setStoredHash(rows[0]?.value);
 }

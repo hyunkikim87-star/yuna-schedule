@@ -7,6 +7,7 @@ import { mapUrl, placeColor } from '../lib/colors.js';
 import Sheet from '../components/Sheet.jsx';
 import ChangeForm from '../components/ChangeForm.jsx';
 import LinkButton from '../components/LinkButton.jsx';
+import ConfirmSheet from '../components/ConfirmSheet.jsx';
 import { ArrowRight, CalendarX, ChevronLeft, Clock } from '../components/Icons.jsx';
 
 const UPCOMING_COUNT = 6;
@@ -77,7 +78,6 @@ export default function ClassDetailPage({ id, refreshKey, changed, go, openForm 
   const removeException = (e, text) => run(() => api.del(`/api/classes/${c.id}/exceptions/${e.id}`), text);
   const extend = (to) => run(() => api.put(`/api/classes/${c.id}`, { ...c, end_date: to }), `${dateLabel(to)}까지 연장했어요`);
   const remove = async () => {
-    if (!window.confirm(`'${c.name}' 정규 수업과 모든 회차를 지울까요?`)) return;
     setBusy(true);
     try {
       await api.del(`/api/classes/${c.id}`);
@@ -195,9 +195,13 @@ export default function ClassDetailPage({ id, refreshKey, changed, go, openForm 
       )}
 
       <div style={{ padding: '28px 20px 0' }}>
-        <button type="button" className="ghost-btn red" onClick={remove} disabled={busy}>이 정규 수업 삭제</button>
+        <button type="button" className="ghost-btn red" onClick={() => setSheet('delete')} disabled={busy}>이 정규 수업 삭제</button>
       </div>
 
+      {sheet === 'delete' && (
+        <ConfirmSheet title="정규 수업 삭제" busy={busy} onConfirm={remove} onClose={() => setSheet(null)}
+          message={`'${c.name}' 수업과 모든 회차(휴강·변경 포함)를 지울까요? 되돌릴 수 없어요.`} />
+      )}
       {sheet === 'cancel' && (
         <Sheet title="휴강할 날짜" onClose={() => setSheet(null)}>
           <p className="page-sub">{c.name} · 남은 회차 중에서 골라주세요</p>

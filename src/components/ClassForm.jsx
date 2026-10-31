@@ -2,8 +2,10 @@ import { useMemo, useState } from 'react';
 import { api } from '../lib/api.js';
 import { useFetch } from '../lib/hooks.js';
 import {
-  addDays, addMinutes, durationLabel, nowInSeoul, toMinutes, weekdayOf, WEEKDAYS,
+  addDays, addMinutes, dateLabel, durationLabel, nowInSeoul, toMinutes, weekdayOf, WEEKDAYS,
 } from '../lib/time.js';
+import { daysBetween } from '../../lib/sessions.js';
+import { conflictSummary, findConflicts } from '../lib/conflicts.js';
 import Sheet from './Sheet.jsx';
 import { PlaceField, TextField, TimeField } from './Fields.jsx';
 import { COMMON_DURATIONS } from '../lib/constants.js';
@@ -51,12 +53,35 @@ export default function ClassForm({ kind: initialKind = 'class', initial, onClos
     }
   }
 
+  // 겹침 경고: 시간·날짜를 그대로 둔 채 한 번 더 누르면 그래도 저장한다
+  const conflictKey = [kind, weekday, date, startDate, endDate, start, end].join('|');
+  const [conflict, setConflict] = useState(null); // { key, text }
+  const conflictShown = conflict && conflict.key === conflictKey ? conflict : null;
+
+  async function checkConflicts() {
+    const from = isClass ? startDate : date;
+    const to = isClass ? (daysBetween(startDate, endDate) > 400 ? addDays(startDate, 400) : endDate) : date;
+    const sessions = await api.get(`/api/sessions?from=${from}&to=${to}`);
+    const list = findConflicts(sessions, isClass
+      ? { kind: 'class', id: initial?.id, weekday, start_date: startDate, end_date: endDate, start_time: start, end_time: end }
+      : { kind: 'one_day', id: initial?.id, date, start_time: start, end_time: end });
+    return conflictSummary(list, dateLabel);
+  }
+
   async function save() {
     setError(null);
     if (!name.trim()) return setError('수업명을 입력해 주세요');
     setBusy(true);
     const common = { name, start_time: start, end_time: end || null, location, supplies, memo, link };
     try {
+      if (!conflictShown) {
+        const text = await checkConflicts().catch(() => '');
+        if (text) {
+          setConflict({ key: conflictKey, text });
+          setBusy(false);
+          return;
+        }
+      }
       let saved;
       if (isClass) {
         const body = { ...common, weekday, start_date: startDate, end_date: endDate, term, color: initial?.color || null };
@@ -142,9 +167,15 @@ export default function ClassForm({ kind: initialKind = 'class', initial, onClos
       <TextField id="link" label="구매·신청 링크" hint="(선택)" value={link} onChange={setLink}
         placeholder="https://" type="url" inputMode="url" autoComplete="off" />
 
+      {conflictShown && (
+        <p className="warn-box" role="alert">
+          <strong>같은 시간에 다른 수업이 있어요</strong>
+          {conflictShown.text}
+        </p>
+      )}
       {error && <p className="form-error" role="alert">{error}</p>}
       <button type="button" className="primary-btn" disabled={busy} onClick={save}>
-        {editing ? '저장' : isClass ? '매주 반복으로 저장' : '이 날짜에 저장'}
+        {conflictShown ? '겹쳐도 저장' : editing ? '저장' : isClass ? '매주 반복으로 저장' : '이 날짜에 저장'}
       </button>
     </Sheet>
   );

@@ -22,6 +22,6 @@ describe('initDb', () => {
       const alter = sql.match(/ALTER TABLE (\w+)/);
       if (alter) expect(created.has(alter[1]), `${alter[1]}를 만들기 전에 ALTER`).toBe(true);
     }
-    expect(created).toEqual(new Set(['schedules', 'classes', 'class_exceptions', 'one_day_events', 'places', 'app_settings']));
+    expect(created).toEqual(new Set(['schedules', 'classes', 'class_exceptions', 'one_day_events', 'places', 'app_settings', 'supply_checks']));
   });
 });

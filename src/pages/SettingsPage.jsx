@@ -62,9 +62,10 @@ function Places({ refreshKey, changed, onClose }) {
       setError(e.message);
     }
   }
+  const [removing, setRemoving] = useState(null);
   async function remove(p) {
-    if (!window.confirm(`'${p.name}'을(를) 목록에서 뺄까요? 이미 등록한 수업은 그대로예요`)) return;
     await api.del(`/api/places/${p.id}`);
+    setRemoving(null);
     changed('목록에서 뺐어요');
   }
 
@@ -75,8 +76,19 @@ function Places({ refreshKey, changed, onClose }) {
         {(data || []).map((p) => (
           <div key={p.id} className="list-row" style={{ paddingLeft: 0, paddingRight: 0 }}>
             <span className="dot lg" style={{ background: placeColor(p.name) }} />
-            <span className="list-row-label">{p.name}</span>
-            <button type="button" className="small-btn" onClick={() => remove(p)}>빼기</button>
+            {removing?.id === p.id ? (
+              // 시트 안이라 확인도 그 자리에서: 이미 등록한 수업의 장소는 그대로 남는다
+              <>
+                <span className="list-row-label" style={{ fontWeight: 500 }}>목록에서 뺄까요?</span>
+                <button type="button" className="small-btn" onClick={() => setRemoving(null)}>취소</button>
+                <button type="button" className="small-btn red" onClick={() => remove(p)}>빼기</button>
+              </>
+            ) : (
+              <>
+                <span className="list-row-label">{p.name}</span>
+                <button type="button" className="small-btn" onClick={() => setRemoving(p)}>빼기</button>
+              </>
+            )}
           </div>
         ))}
       </div>

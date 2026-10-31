@@ -94,6 +94,17 @@ export async function initDb() {
     )
   `);
 
+  // 준비물 챙김 표시 (회차 = 날짜 + 정규/원데이 + 원본 id). 수업을 지워도 남는 건 무시해도 되는 작은 기록.
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS supply_checks (
+      date      DATE         NOT NULL,
+      kind      VARCHAR(10)  NOT NULL,
+      source_id INTEGER      NOT NULL,
+      item      VARCHAR(100) NOT NULL,
+      PRIMARY KEY (date, kind, source_id, item)
+    )
+  `);
+
   // 나중에 추가한 열. 테이블을 모두 만든 뒤에 둔다 (빈 DB에서도 순서대로 동작하게).
   // 그 날만 다른 준비물 (예: 첫 날만 '체스판')
   await pool.query(`ALTER TABLE class_exceptions ADD COLUMN IF NOT EXISTS supplies TEXT`);

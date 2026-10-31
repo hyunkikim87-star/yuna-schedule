@@ -4,7 +4,6 @@ import { useHashPath } from './lib/hooks.js';
 import PinScreen from './components/PinScreen.jsx';
 import TabBar from './components/TabBar.jsx';
 import ClassForm from './components/ClassForm.jsx';
-import SessionSheet from './components/SessionSheet.jsx';
 import { Plus } from './components/Icons.jsx';
 import HomePage from './pages/HomePage.jsx';
 import CalendarPage from './pages/CalendarPage.jsx';
@@ -18,7 +17,6 @@ export default function App() {
   const [path, go] = useHashPath();
   const [refreshKey, setRefreshKey] = useState(0);
   const [form, setForm] = useState(null); // { kind, initial } 수업 추가·수정 시트
-  const [openSession, setOpenSession] = useState(null); // 회차 시트
   const [toast, setToast] = useState(null);
 
   const checkAuth = useCallback(() => api.get('/api/auth/status')
@@ -29,6 +27,22 @@ export default function App() {
     setUnauthorizedHandler(() => setAuth((a) => ({ ...a, loggedIn: false })));
     checkAuth();
   }, [checkAuth]);
+
+  // 앱으로 돌아오면(다른 앱·탭에 있다가) 다시 불러온다: 다른 폰에서 바꾼 내용이 바로 보이게. 너무 잦지 않게 20초 간격.
+  const lastRefresh = useRef(0);
+  useEffect(() => {
+    const onReturn = () => {
+      if (document.visibilityState !== 'visible' || Date.now() - lastRefresh.current < 20_000) return;
+      lastRefresh.current = Date.now();
+      setRefreshKey((k) => k + 1);
+    };
+    document.addEventListener('visibilitychange', onReturn);
+    window.addEventListener('focus', onReturn);
+    return () => {
+      document.removeEventListener('visibilitychange', onReturn);
+      window.removeEventListener('focus', onReturn);
+    };
+  }, []);
 
   // 알림 한 줄. action({ label, run })이 있으면 버튼을 붙이고 조금 더 오래 보여준다 (예: 휴강 취소).
   const toastTimer = useRef(null);
@@ -47,7 +61,7 @@ export default function App() {
   if (!auth.checked) return <div className="loading">불러오는 중…</div>;
   if (!auth.loggedIn) return <PinScreen length={auth.pinLength} onSuccess={checkAuth} />;
 
-  const ctx = { refreshKey, changed, notify, go, openForm: setForm, openSession: setOpenSession };
+  const ctx = { refreshKey, changed, notify, go, openForm: setForm };
   const detailMatch = path.match(/^\/classes\/(\d+)$/);
   const oneDayMatch = path.match(/^\/one-day\/(\d+)$/);
 
@@ -79,15 +93,6 @@ export default function App() {
             changed(text);
             if (saved?.goTo) go(saved.goTo);
           }}
-        />
-      )}
-      {openSession && (
-        <SessionSheet
-          session={openSession}
-          onClose={() => setOpenSession(null)}
-          onChanged={(text, action) => { setOpenSession(null); changed(text, action); }}
-          onEditOneDay={(ev) => { setOpenSession(null); setForm({ kind: 'one_day', initial: ev }); }}
-          go={(p) => { setOpenSession(null); go(p); }}
         />
       )}
       {toast && (
