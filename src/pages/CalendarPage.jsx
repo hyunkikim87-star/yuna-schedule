@@ -94,7 +94,7 @@ export default function CalendarPage({ refreshKey, openSession }) {
               <span className="session-name-row">
                 <span className="list-title">{s.name}</span>
                 {s.kind === 'one_day' && <span className="tag">원데이</span>}
-                {s.changed && <span className="tag blue">변경</span>}
+                {s.changed && <span className="tag blue">이 날만 변경</span>}
                 {s.overlap && <span className="tag red">시간 겹침</span>}
               </span>
               {s.location && <span className="list-desc" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span className="dot" style={{ background: sessionColor(s) }} />{s.location}</span>}

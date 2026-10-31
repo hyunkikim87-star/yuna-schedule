@@ -114,7 +114,8 @@ h1, h2, h3, p { margin: 0; }
 .list-row { min-height: 56px; padding: 0 12px 0 18px; border-top: 1px solid var(--fill); display: flex; align-items: center; gap: 10px; }
 .list-row:first-child { border-top: 0; }
 .list-row-label { flex: 1; font-size: 15px; font-weight: 600; }
-.list-row-label.off { color: var(--faint); text-decoration: line-through; }
+.list-row-label.muted { color: var(--sub); }
+.small-btn.outline { background: var(--card); border: 1px solid #D1D6DB; color: var(--ink-2); }
 .small-btn { min-width: 64px; height: 36px; padding: 0 12px; border: 0; border-radius: 10px; background: var(--fill); color: var(--ink-2); font-size: 14px; font-weight: 600; }
 .small-btn.red { background: var(--danger-soft); color: var(--danger); }
 .more-btn { margin: 16px var(--gutter) 0; width: calc(100% - 2 * var(--gutter)); min-height: 52px; padding: 0 18px; border: 0; border-radius: 16px; background: var(--card); color: var(--ink-2); font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; }
@@ -202,6 +203,7 @@ textarea.input { height: auto; min-height: 80px; padding: 14px 16px; resize: ver
 .pin-pad button:active { background: var(--fill); }
 @keyframes shake { 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
 
-.toast { position: fixed; left: 50%; bottom: calc(var(--tabbar) + 24px); transform: translateX(-50%); z-index: 60; padding: 12px 18px; border-radius: 14px; background: rgba(25,31,40,0.92); color: #FFFFFF; font-size: 15px; font-weight: 600; width: max-content; max-width: min(440px, calc(100vw - 40px)); text-align: center; word-break: keep-all; }
+.toast { position: fixed; left: 50%; bottom: calc(var(--tabbar) + 24px); transform: translateX(-50%); z-index: 60; padding: 12px 18px; border-radius: 14px; background: rgba(25,31,40,0.92); color: #FFFFFF; font-size: 15px; font-weight: 600; width: max-content; max-width: min(440px, calc(100vw - 40px)); text-align: center; word-break: keep-all; display: flex; align-items: center; gap: 14px; }
+.toast-action { flex-shrink: 0; min-height: 36px; padding: 0 4px; border: 0; background: transparent; color: #9CC7FF; font-size: 15px; font-weight: 700; }
 .loading { padding: 40px; text-align: center; color: var(--sub); font-size: 15px; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

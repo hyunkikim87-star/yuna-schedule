@@ -49,14 +49,15 @@ export default function ClassDetailPage({ id, refreshKey, changed, go, openForm 
   const cancelledSet = new Set(cancels.map((e) => e.date));
   const shownDates = showAll ? futureDates : futureDates.slice(0, UPCOMING_COUNT);
 
-  async function run(fn, text) {
+  // undo(result)가 있으면 알림에 되돌리기 버튼을 붙인다
+  async function run(fn, text, undo) {
     setBusy(true);
     setErr(null);
     try {
-      await fn();
+      const result = await fn();
       setSheet(null);
       setChangeDate(null);
-      changed(text);
+      changed(text, undo?.(result));
     } catch (e) {
       setErr(e.message);
     } finally {
@@ -64,7 +65,15 @@ export default function ClassDetailPage({ id, refreshKey, changed, go, openForm 
     }
   }
 
-  const cancelOn = (d) => run(() => api.post(`/api/classes/${c.id}/exceptions`, { date: d, type: 'cancel' }), `${dateLabel(d)} 휴강으로 바꿨어요`);
+  // 그 날 '이 날만 변경'이 있었다면 휴강이 그걸 덮어쓰므로, 되돌리기는 변경이 없던 날만 준다
+  const cancelOn = (d) => run(
+    () => api.post(`/api/classes/${c.id}/exceptions`, { date: d, type: 'cancel' }),
+    `${dateLabel(d)} 휴강으로 바꿨어요`,
+    exFor(d) ? undefined : (ex) => ({
+      label: '휴강 취소',
+      run: () => api.del(`/api/classes/${c.id}/exceptions/${ex.id}`).then(() => changed('휴강을 취소했어요')),
+    })
+  );
   const removeException = (e, text) => run(() => api.del(`/api/classes/${c.id}/exceptions/${e.id}`), text);
   const extend = (to) => run(() => api.put(`/api/classes/${c.id}`, { ...c, end_date: to }), `${dateLabel(to)}까지 연장했어요`);
   const remove = async () => {
@@ -85,7 +94,10 @@ export default function ClassDetailPage({ id, refreshKey, changed, go, openForm 
   return (
     <>
       <div style={{ padding: '12px 8px 0', display: 'flex', justifyContent: 'space-between' }}>
-        <a href="#/classes" className="icon-btn" aria-label="수업 목록으로"><ChevronLeft size={24} stroke={2.2} /></a>
+        <button type="button" className="icon-btn" aria-label="뒤로"
+          onClick={() => (window.history.length > 1 ? window.history.back() : go('/classes'))}>
+          <ChevronLeft size={24} stroke={2.2} />
+        </button>
         <button type="button" className="small-btn" style={{ background: 'var(--card)', marginRight: 12, alignSelf: 'center' }}
           onClick={() => openForm({ kind: 'class', initial: c })}>수정</button>
       </div>
@@ -112,7 +124,7 @@ export default function ClassDetailPage({ id, refreshKey, changed, go, openForm 
       {c.link && <LinkButton href={c.link} style={{ margin: '12px 20px 0' }} />}
 
       <div className="actions">
-        <button type="button" className="action" onClick={() => setSheet('cancel')}><CalendarX size={22} color="#D22030" />휴강 추가</button>
+        <button type="button" className="action" onClick={() => setSheet('cancel')}><CalendarX size={22} color="#D22030" />휴강 날짜 고르기</button>
         <button type="button" className="action" onClick={() => setSheet('change')}><Clock size={22} color="#1B64DA" />이 날만 변경</button>
         <button type="button" className="action" onClick={() => { setExtendTo(addDays(c.end_date, 28)); setSheet('extend'); }}><ArrowRight size={22} color="#15803D" />기간 연장</button>
       </div>
@@ -131,12 +143,14 @@ export default function ClassDetailPage({ id, refreshKey, changed, go, openForm 
             const time = ch && ex.start_time ? ex.start_time : c.start_time;
             return (
               <div key={d} className="list-row">
-                <span className={`list-row-label${off ? ' off' : ''}`}>{dateLabel(d)} {off ? '· 휴강' : time}</span>
+                {/* 상태는 태그로, 버튼에는 '누르면 하는 일'을 적는다 */}
+                <span className={`list-row-label${off ? ' muted' : ''}`}>{dateLabel(d)} {off ? '' : time}</span>
                 {d === today && <span className="tag blue">오늘</span>}
-                {ch && <span className="tag blue">변경</span>}
+                {off && <span className="tag red">휴강</span>}
+                {ch && <span className="tag blue">이 날만 변경</span>}
                 {off
-                  ? <button type="button" className="small-btn" disabled={busy} onClick={() => removeException(ex, '휴강을 해제했어요')}>되돌리기</button>
-                  : <button type="button" className="small-btn red" disabled={busy} onClick={() => cancelOn(d)}>휴강</button>}
+                  ? <button type="button" className="small-btn" disabled={busy} onClick={() => removeException(ex, '휴강을 취소했어요')}>휴강 취소</button>
+                  : <button type="button" className="small-btn outline" disabled={busy} onClick={() => cancelOn(d)}>휴강하기</button>}
               </div>
             );
           })}
@@ -158,7 +172,7 @@ export default function ClassDetailPage({ id, refreshKey, changed, go, openForm 
                 <span className="list-row-label" style={{ fontWeight: 500 }}>
                   {dateLabel(e.date)} · {[e.start_time && `${e.start_time}${e.end_time ? `–${e.end_time}` : ''}`, e.location, e.memo].filter(Boolean).join(' · ')}
                 </span>
-                <button type="button" className="small-btn" disabled={busy} onClick={() => removeException(e, '원래대로 되돌렸어요')}>해제</button>
+                <button type="button" className="small-btn" disabled={busy} onClick={() => removeException(e, '원래대로 되돌렸어요')}>원래대로</button>
               </div>
             ))}
           </div>
@@ -174,7 +188,7 @@ export default function ClassDetailPage({ id, refreshKey, changed, go, openForm 
           {cancels.map((e) => (
             <div key={e.id} className="list-row">
               <span className="list-row-label" style={{ fontWeight: 500, color: 'var(--ink-2)' }}>{dateLabel(e.date)}</span>
-              <button type="button" className="small-btn" disabled={busy} onClick={() => removeException(e, '휴강을 해제했어요')}>해제</button>
+              <button type="button" className="small-btn" disabled={busy} onClick={() => removeException(e, '휴강을 취소했어요')}>휴강 취소</button>
             </div>
           ))}
         </div>

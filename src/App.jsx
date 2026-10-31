@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { api, setUnauthorizedHandler } from './lib/api.js';
 import { useHashPath } from './lib/hooks.js';
 import PinScreen from './components/PinScreen.jsx';
@@ -30,15 +30,18 @@ export default function App() {
     checkAuth();
   }, [checkAuth]);
 
-  const notify = useCallback((text) => {
-    setToast(text);
-    setTimeout(() => setToast(null), 2200);
+  // 알림 한 줄. action({ label, run })이 있으면 버튼을 붙이고 조금 더 오래 보여준다 (예: 휴강 취소).
+  const toastTimer = useRef(null);
+  const notify = useCallback((text, action) => {
+    clearTimeout(toastTimer.current);
+    setToast({ text, action });
+    toastTimer.current = setTimeout(() => setToast(null), action ? 5000 : 2200);
   }, []);
 
   // 저장·삭제 뒤 모든 화면 다시 불러오기
-  const changed = useCallback((text) => {
+  const changed = useCallback((text, action) => {
     setRefreshKey((k) => k + 1);
-    if (text) notify(text);
+    if (text) notify(text, action);
   }, [notify]);
 
   if (!auth.checked) return <div className="loading">불러오는 중…</div>;
@@ -82,12 +85,21 @@ export default function App() {
         <SessionSheet
           session={openSession}
           onClose={() => setOpenSession(null)}
-          onChanged={(text) => { setOpenSession(null); changed(text); }}
+          onChanged={(text, action) => { setOpenSession(null); changed(text, action); }}
           onEditOneDay={(ev) => { setOpenSession(null); setForm({ kind: 'one_day', initial: ev }); }}
           go={(p) => { setOpenSession(null); go(p); }}
         />
       )}
-      {toast && <div className="toast" role="status">{toast}</div>}
+      {toast && (
+        <div className="toast" role="status">
+          <span>{toast.text}</span>
+          {toast.action && (
+            <button type="button" className="toast-action" onClick={() => { setToast(null); toast.action.run(); }}>
+              {toast.action.label}
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

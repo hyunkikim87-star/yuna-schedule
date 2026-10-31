@@ -12,25 +12,31 @@ export default function SessionSheet({ session: s, onClose, onChanged, onEditOne
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
 
-  async function run(fn, text) {
+  // undo(result)가 있으면 알림에 되돌리기 버튼을 붙인다
+  async function run(fn, text, undo) {
     setBusy(true);
     setError(null);
     try {
-      await fn();
-      onChanged(text);
+      const result = await fn();
+      onChanged(text, undo?.(result));
     } catch (e) {
       setError(e.message);
       setBusy(false);
     }
   }
 
+  // '이 날만 변경'이 있던 회차는 휴강이 그걸 덮어쓰므로 되돌리기를 주지 않는다
   const cancelDay = () => run(
     () => api.post(`/api/classes/${s.source_id}/exceptions`, { date: s.date, type: 'cancel' }),
-    `${dateLabel(s.date)} 휴강으로 바꿨어요`
+    `${dateLabel(s.date)} 휴강으로 바꿨어요`,
+    s.exception_id ? undefined : (ex) => ({
+      label: '휴강 취소',
+      run: () => api.del(`/api/classes/${s.source_id}/exceptions/${ex.id}`).then(() => onChanged('휴강을 취소했어요')),
+    })
   );
   const undoChange = () => run(
     () => api.del(`/api/classes/${s.source_id}/exceptions/${s.exception_id}`),
-    '원래 시간으로 되돌렸어요'
+    '원래대로 되돌렸어요'
   );
   const deleteOneDay = () => {
     if (!window.confirm(`'${s.name}'을(를) 지울까요?`)) return;
@@ -69,9 +75,9 @@ export default function SessionSheet({ session: s, onClose, onChanged, onEditOne
       {s.kind === 'class' ? (
         <>
           <div className="grid-2" style={{ marginTop: 20 }}>
-            <button type="button" className="ghost-btn red" style={{ marginTop: 0 }} disabled={busy} onClick={cancelDay}>이 날 휴강</button>
+            <button type="button" className="ghost-btn red" style={{ marginTop: 0 }} disabled={busy} onClick={cancelDay}>이 날 휴강하기</button>
             {s.changed
-              ? <button type="button" className="ghost-btn" style={{ marginTop: 0 }} disabled={busy} onClick={undoChange}>변경 되돌리기</button>
+              ? <button type="button" className="ghost-btn" style={{ marginTop: 0 }} disabled={busy} onClick={undoChange}>원래대로</button>
               : <button type="button" className="ghost-btn" style={{ marginTop: 0 }} disabled={busy} onClick={() => setMode('change')}>이 날만 변경</button>}
           </div>
           <button type="button" className="primary-btn" style={{ marginTop: 8 }} onClick={() => go(`/classes/${s.source_id}`)}>정규 수업 정보 보기</button>
