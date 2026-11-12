@@ -15,26 +15,7 @@ pool.on('error', (err) => {
 });
 
 export async function initDb() {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS schedules (
-      id         SERIAL PRIMARY KEY,
-      year       INTEGER      NOT NULL,
-      month      INTEGER      NOT NULL,
-      week       INTEGER      NOT NULL,
-      day        VARCHAR(10)  NOT NULL,
-      class_name VARCHAR(100) NOT NULL,
-      location   VARCHAR(100),
-      memo       TEXT,
-      supplies   TEXT,
-      start_time VARCHAR(5),
-      end_time   VARCHAR(5)
-    )
-  `);
-  await pool.query(`ALTER TABLE schedules ADD COLUMN IF NOT EXISTS start_time VARCHAR(5)`);
-  await pool.query(`ALTER TABLE schedules ADD COLUMN IF NOT EXISTS end_time VARCHAR(5)`);
-  await pool.query(`ALTER TABLE schedules ALTER COLUMN day TYPE VARCHAR(10)`);
-
-  // v2: 정규 수업 + 예외 + 원데이. 회차는 DB에 만들어 두지 않고 lib/sessions.js에서 계산한다.
+  // 정규 수업 + 예외 + 원데이. 회차는 DB에 만들어 두지 않고 lib/sessions.js에서 계산한다.
   await pool.query(`
     CREATE TABLE IF NOT EXISTS classes (
       id         SERIAL PRIMARY KEY,

@@ -100,27 +100,3 @@ export function getHolidayMap(...years) {
   for (const y of years) for (const h of getAllHolidays(y)) map[h.date] = h.name;
   return map;
 }
-
-export function getNthSaturday(year, month, week) {
-  const d = new Date(year, month - 1, 1);
-  let count = 0;
-  while (d.getMonth() === month - 1) {
-    if (d.getDay() === 6) { count++; if (count === week) return new Date(d); }
-    d.setDate(d.getDate() + 1);
-  }
-  return null;
-}
-
-// Returns array of { date: 'YYYY-MM-DD', name: '공휴일명' } for weekday holidays in the given week.
-// A "week" spans Mon(sat-5) through Sun(sat+1) where sat is the Nth Saturday of the month.
-export function getHolidaysInWeek(year, month, week) {
-  const sat = getNthSaturday(year, month, week);
-  if (!sat) return [];
-  const weekStart = new Date(sat); weekStart.setDate(sat.getDate() - 5);
-  const weekEnd = new Date(sat); weekEnd.setDate(sat.getDate() + 1);
-  return getAllHolidays(year).filter(h => {
-    const d = new Date(h.date);
-    const dow = d.getDay();
-    return d >= weekStart && d <= weekEnd && dow !== 0 && dow !== 6;
-  });
-}
