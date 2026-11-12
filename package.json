@@ -13,7 +13,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "migrate:preview": "node scripts/migrate/preview.js",
-    "migrate:import": "node scripts/migrate/import.js"
+    "migrate:import": "node scripts/migrate/import.js",
+    "archive:v1": "node scripts/archive/run-v1.mjs"
   },
   "dependencies": {
     "express": "^5.2.1",
@@ -31,6 +32,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
+    "pg-mem": "^3.0.5",
     "supertest": "^7.2.2",
     "vite": "^8.0.12",
     "vitest": "^4.1.7"

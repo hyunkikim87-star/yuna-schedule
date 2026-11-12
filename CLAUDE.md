@@ -25,4 +25,5 @@
 - PIN을 잊었을 때: Railway 서비스에 `APP_PIN_RESET=true`를 넣고 재시작 → 앱에서 바꾼 PIN(DB)이 지워지고 `APP_PIN_HASH` PIN으로 돌아감 → 그 변수는 바로 삭제
 - 데이터 옮기기(전환 때 1회, 완료): `npm run migrate:preview -- backup/schedules_*.json` → 표 확인 → `npm run migrate:import -- <주소> backup/migration_plan.json [--production]`
   - 이름·장소 통일 목록은 `scripts/migrate/renames.json`, import는 비어 있지 않은 DB에서 멈춘다
+- 예전 앱(v1) 다시 띄우기(영상·기록용): `npm run archive:v1 [-- 백업.json]` → http://localhost:3200. 태그 `v1-final`을 옆 폴더 `../yuna-schedule-v1`에 꺼내 메모리 DB(pg-mem)로 띄움. 운영과 무관
 - 구매 링크 일괄 넣기: `node scripts/links/apply.js <주소> backup/links_*.json [--production]` (날짜·시간·이름으로 짝, 애매하면 건너뜀)
