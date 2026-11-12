@@ -30,7 +30,7 @@ afterEach(() => vi.useRealTimers());
 
 describe('PIN 잠금', () => {
   it('PIN 없이 API 호출 → 401', async () => {
-    for (const path of ['/api/sessions?from=2026-10-31&to=2026-11-01', '/api/classes', '/api/schedules?year=2026&month=10&week=5']) {
+    for (const path of ['/api/sessions?from=2026-10-31&to=2026-11-01', '/api/classes', '/api/one-day-events']) {
       const res = await request(app).get(path);
       expect(res.status).toBe(401);
     }

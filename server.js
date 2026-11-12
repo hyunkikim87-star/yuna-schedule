@@ -2,7 +2,6 @@ import express from 'express';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import { initDb } from './db.js';
-import schedulesRouter from './routes/schedules.js';
 import authRouter, { loadStoredPinHash } from './routes/auth.js';
 import classesRouter from './routes/classes.js';
 import oneDayEventsRouter from './routes/oneDayEvents.js';
@@ -21,7 +20,6 @@ app.get('/api/health', (_req, res) => res.json({ ok: true }));
 app.use(requireAuth);
 app.use('/api/auth', authRouter);
 
-app.use('/api/schedules', schedulesRouter);
 app.use('/api/sessions', sessionsRouter);
 app.use('/api/classes', classesRouter);
 app.use('/api/one-day-events', oneDayEventsRouter);
